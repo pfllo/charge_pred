@@ -1,23 +1,46 @@
-\section{Approach}
-\todo{re-examine the equations and annotations}
-The framework of our fact-based charge prediction model is shown in Figure \ref{fig_model_framework}. First, the input fact description is passed to a document embedding module. Concurrently, the input fact description is also passed to a relevant article extraction module to find top $k$ relevant law articles. Each article is also passed to a document embedding module, and the article embeddings are further passed to a sequence encoder to get the final embedding of each article. The fact embedding generated previously is used to generate the attention over the extracted articles. The article embeddings are then aggregated with the attention distribution, and fed to the softmax function along with the fact embedding to predict the charge distribution of this case.
 
-
-%The fact-based charge classification task can be formatted as a multi-label document classification task. The input is several sentences describing the facts of a case, and the output is multiple charges related to the case. Since usually multiple elements are required to constitute a charge (for example, the charge of acceptance of bribes requires the defendant to illegally accepts another person's money, and the defendant should also be a state functionary), the recurrent neural network (RNN) seems like a natural fit for the task. Considering the fact that only a small portion of the facts are crucial for the determination of charges, we also use attention mechanism in our model. Since the HAN model  satisfies many of our requirements except the multi-label classification capability, we use the framework of the HAN model for document embedding, but replace the output module and the loss function with ones that are compatible with the multi-label classification task. Furthermore, to take the information of article into account, we add another article attention module to incorporate the information of relevant articles to the model.
-\subsection{Document Embedding}
-Our document embedding module is based on the HAN model proposed by \cite{yang2016hierarchical}. The framework is shown in Figure \ref{doc_embed}.
-
-\begin{figure}[htbp]
+\begin{figure}[t!]
 \begin{center}
-\includegraphics[width=8.5cm]{figures/whole_framework.png}	
-\caption{Model Overview}
+\includegraphics[width=0.48\textwidth]{figures/charge_pred_overview.png}	
+\caption{Overview of Our Model}
 \label{fig_model_framework}
 \end{center}
 \end{figure}
 
+\section{Our Approach}
+In order to generate reasonable charge prediction, our approach follows four steps as depicted in Figure \ref{fig_model_framework}. 
+(1) The input fact description is fed to a document encoder to generate the fact embedding $\mathbf{d_f}$.
+(2) Concurrently, the input fact description is also passed to a relevant article extractor to find top $k$ relevant law articles. 
+(3) Each article is fed to another document encoder, and the article embeddings are further passed to an article aggregator to produce the aggregated article embedding $\mathbf{d_a}$. Meanwhile, three global attention vectors, i.e., $\mathbf{u_{aw}}$, $\mathbf{u_{as}}$ and $\mathbf{u_{ad}}$, are generated from the fact embedding $\mathbf{d_f}$ for the document encoder and the article aggregator. 
+(4) Finally, $\mathbf{d_f}$ and $\mathbf{d_a}$ are concatenated and passed to a softmax classifier to predict the charge distribution of the input case.
+\orange{what is the best way to organize this section?}
 
-\paragraph{Sequence Encoder} 
-A sentence is composed of a sequence of words, and a document is composed of a sequence of sentences. It is important to consider the correlation of the elements when encoding a sequence. Here we use the bi-directional GRU model  for sequence encoding, which is an extension of the GRU model \cite{cho2014learning} that use a forward and a backward GRU to model the sequence separately, and then combine the results of both GRUs. Given a sequence $[x_1, x_2, ..., x_T]$ where $x_t$ is the embedding of the element at position $t$, the encoding result is:
+%The fact-based charge classification task can be formatted as a multi-label document classification task. The input is several sentences describing the facts of a case, and the output is multiple charges related to the case. Since usually multiple elements are required to constitute a charge (for example, the charge of acceptance of bribes requires the defendant to illegally accepts another person's money, and the defendant should also be a state functionary), the recurrent neural network (RNN) seems like a natural fit for the task. Considering the fact that only a small portion of the facts are crucial for the determination of charges, we also use attention mechanism in our model. Since the HAN model  satisfies many of our requirements except the multi-label classification capability, we use the framework of the HAN model for document embedding, but replace the output module and the loss function with ones that are compatible with the multi-label classification task. Furthermore, to take the information of article into account, we add another article attention module to incorporate the information of relevant articles to the model.
+
+\subsection{Document Encoder}
+% Our document encoder module is based on the framework of Hierarchical Neural Network (HAN) proposed by \cite{yang2016hierarchical}. The overview of our document encoder is shown in Figure \ref{fig_doc_encoder}. 
+Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. As suggested by previous works \cite{tang2015document,yang2016hierarchical}, the document embedding problem can be converted to two sequence embedding problems, i.e., embedding sequence of words and embedding sequence of sentences (see Figure \ref{fig_doc_encoder}). Therefore, the key problem of document embedding lies in building an effective sequence encoder. \todo{describe Figure \ref{fig_doc_encoder} somewhere}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.45\textwidth]{figures/attentive_seq_encoder.png}	
+\caption{Attentive Sequence Encoder}
+\label{fig_seq_encoder}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.35\textwidth]{figures/document_encoder.png}	
+\caption{Document Encoder}
+\label{fig_doc_encoder}
+\end{center}
+\end{figure}
+
+\paragraph{Bi-GRU Sequence Encoder} 
+
+
+It is important to consider the correlation of the elements when encoding a sequence. Here we use the bi-directional GRU model  for sequence encoding, which is an extension of the GRU model \cite{cho2014learning} that use a forward and a backward GRU to model the sequence separately, and then combine the results of both GRUs. Given a sequence $[x_1, x_2, ..., x_T]$ where $x_t$ is the embedding of the element at position $t$, the encoding result is:
 
 \begin{equation}
 %\overrightarrow{h}_t = \overrightarrow{GRU}(x_t)
@@ -48,13 +71,7 @@ where $r_t$ is the reset gate, which is controls how information does the previo
 r_t=\sigma(W_r x_t + U_r h_{t-1} + b_r)
 \end{equation}
 
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[width=6.5cm]{figures/HAN.png}	
-\caption{Document Embedding Model}
-\label{doc_embed}
-\end{center}
-\end{figure}
+
 
 \paragraph{Element Attention}
 Since not all elements of a sequence contributes equally to the final output, the attention mechanism is used to select the most import parts of a sequence. Given the GRU output $[h_1, h_2, ..., h_T]$ of a sequence, we calculate a sequence of attention values $[\alpha_1, \alpha_2, ..., \alpha_T]$ where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final embedding of the sequence is calculated as:
