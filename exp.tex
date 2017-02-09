@@ -1,0 +1,120 @@
+\section{Experiments}
+\subsection{Implementation Details}
+We use HanLP\footnote{\url{https://github.com/hankcs/HanLP}} for Chinese word segmentation and POS tagging. As for word embeddings, we use the summary part of Baidu Encyclopedia, 3 million judgement documents and 3 million legal question answer pairs crawled from multiple legal forums as corpus, and the word2vec tool\footnote{\url{https://github.com/dav/word2vec}} for training. The dimension of the resultant word embedding is 100 and there are 573,353 words in total. During training and test, all the time expressions, names and charges\footnote{Although rare, sometimes the charge may appear in the fact part. This conversion ensures that we do not use this information.} in the text are converted to 3 special tokens separately and the words not in the pre-trained word embeddings are converted to another special token. All the word embeddings remain unchanged during training except for the special tokens. 
+
+Apart form the pre-trained word embeddings, we also randomly initialize a 50 dimensional vector for each POS tag, and the POS tag embedding is concatenated with the word embedding to generate the final input. The GRU dimension is 75 and the output of the bi-directional GRU at each step is of dimension 150. The MLP between the document embedding and the softmax function has a hidden layer of size 200 and its output layer is of size 150. We keep the top 20 articles found by the relevant article extractor, and the weight of the article attention loss is 0.01. During training, the learning rate is 0.1, the batch size is 8. We also clip the gradient so that the sum of square of the L2 norms of the trainable tensors does not exceed 5. To accelerate the training, we constrain the number of sentences of each fact description to be less than 50 and the the maximum length of each fact sentence to be 50. As for articles, we constrain the maximum length of each sentence to be 30. The feature selection part in the relevant article extraction model keeps the top 2,000 features, and we use the SVM model implemented in scikit-learn \cite{scikit-learn} in our experiments.
+
+
+\begin{table}
+\centering
+\small{
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Model}				& \textbf{Precision} 	& \textbf{Recall} 		& \textbf{F1} 	\\
+\hline
+\textit{SVM} 				& \textbf{93.94}/79.53					& 77.66/49.54  					& 85.03/61.05 				 	\\
+\hline
+\textit{SVM\_article} 			& 91.77/71.33					& 72.10/45.85  					& 80.76/55.82				 	\\
+\hline
+\textit{SVM\_gold\_article$^*$} 	& \textbf{98.97}/94.58			& 95.39/83.21  					& 97.15/88.53					\\
+\hline
+\textit{SVM\_only\_gold$^*$} 		& 98.78/90.46					& 97.92/91.79  					& 98.35/91.12					\\
+\hline
+\textit{HAN}				& 91.30/\textbf{83.32}			& 87.39/74.99  					& 89.31/78.94					\\
+\hline
+\textit{HAN\_article}			& 90.79/83.07					& 88.42/75.73  					& 89.59/79.23					\\
+\hline
+\textbf{\textit{HAN\_guide\_article}} 	& 91.80/82.44 					& \textbf{88.67/78.62} 			& \textbf{90.21/80.48} 		 	\\
+\hline
+\textbf{\textit{HAN\_gold\_article$^*$}} 		& 98.78/\textbf{95.26} 			& \textbf{98.24/95.57} 			& \textbf{98.51/95.42} 			\\
+\hline
+\end{tabular}
+}
+\caption{Main Results. $^*$ means we use gold standard relevant law articles, which are not available in practice.}
+\label{tabble_main_results}
+\end{table}
+
+
+
+\subsection{Main Results}
+\todo{add inspiration to Chinese judiciary}
+We compare our method with the baseline bag-of-words SVM method. The baseline method is similar to the method described in Section \ref{Extracting Relevant Articles} except that the outputs are charges rather than articles. The results is summarized in Table \ref{tabble_main_results}. The left side of the slash refers to the micro statistics, and the right side refers to the macro statistics. For example, the micro precision is the number of correct charge predictions divided by the total number of charge predictions. The macro precision is the average of the precision of each charge. %The $Acc.$ refers to instance accuracy, which is the number of instances whose classes are all correctly predicted divided by the total number of instances.
+
+We can see that, the baseline SVM model proves to be a very strong baseline which achieves 85.03 micro F1. If we use both the facts and the gold standard articles of each case ($SVM\_gold\_article$), the micro F1 can be further improved to 97.15, which shows that the relevant law articles contain substantial valuable information. However, if we use the extracted top 20 articles instead of the correct articles ($SVM\_article$), the micro F1 drops significantly, which shows that the SVM cannot benefit from the additional information from relevant articles if the relevant articles contain noise. If we only use the gold standard articles of each case for classification ($SVM\_only\_gold$), the micro F1 can be further improved to 98.35, which further indicates that the SVM model has bad resistence to noise. 
+
+Since our model uses recurrent neural network for sequence encoding, it can better understand the relation between sentences and words. And due to the attention mechanism, it can further distinguish important information from unimportant ones. Therefore, when the input only contains the fact description ($HAN$\footnote{The document embedding module is based on the HAN model.}), our neural network model performs significantly better than the SVM model. Since the attention mechanism gives the model the ability to distinguish true relevant articles from wrong predictions produced by the previous step, our model can get further performance boost when the extracted top 20 articles are used ($HAN\_article$). Furthermore, if we use the gold standard articles in the training data to guide the attention procedure ($HAN\_guided\_article$), the performance can be further improved. Apart from that, if we use gold standard articles instead of extracted ones, our model also outperforms the baseline SVM model. \todo{find a name to the proposed model}
+
+\subsection{Performance of Relevant Article Extraction}
+\begin{table}
+\centering
+\normalsize{
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+				& \textbf{Top\_5} 	& \textbf{Top\_10} 		& \textbf{Top\_20} 	& \textbf{Top\_30} \\
+\hline
+\textit{Recall} 		& 77.60			& 88.96  				& 94.21			& 96.53 	\\
+\hline
+\textit{NDCG} 		& 80.28			& 84.32  				& 86.47			& 87.24 	\\
+\hline
+\end{tabular}
+}
+\caption{Relevant Article Extraction Result}
+\label{tab_article_extraction}
+\end{table}
+
+Our relevant article extraction module achieves 86.44\% top 1 accuracy, 61.08\% micro F1, and the other evaluation indicators are shown in Table \ref{tab_article_extraction}. We can see that, the relevant article extraction task is also a hard task in itself. Although our SVM model achieves reasonable ranking performance, its prediction performance is not very good. If we use the prediction results directly in our model, we will suffer from a severe error propagation problem. Therefore, we instead let the relevant article extraction module return the top $k$ articles, and use attention mechanism the distinguish true relevant articles from incorrect ones. Since the recall of the top 20 results has achieved 94.21\%, which already includes most of the relevant articles, we use top 20 articles in our experiment.
+
+\subsection{Evaluating Article Attention}
+\begin{table}
+\centering
+\normalsize{
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Att\_Weight}			& \textbf{Acc@1} 			& \textbf{Acc\_Full} 			& \textbf{MAP} 			& \textbf{NDCG} \\
+\hline
+\textit{0} 					& 60.94					& 50.76  					& 61.61 				& 76.31 	\\
+\hline
+\textit{0.01} 				& 77.96					& 66.77  					& 76.46				& 86.19 	\\
+\hline
+\textit{0.1} 				& 87.90					& 74.14  					& 83.39				& 90.93 	\\
+\hline
+\textit{1} 					& \textbf{92.66}				& \textbf{80.43}  			& \textbf{88.24}			& \textbf{93.81} 	\\
+\hline
+\end{tabular}
+}
+\caption{Article Attention Evaluation}
+\label{tab_article_att}
+\end{table}
+
+We can consider the article attention module as a re-ranking function over the extracted top $k$ articles, and then use the gold standard articles in the top $k$ articles to evaluate the reranking performance. Table \ref{tab_article_att} shows the model performance under different article attention loss weights ($\beta$ in Equation \ref{final_loss}, first column in Table \ref{tab_article_att}). $Acc\_Full$ refers to full accuracy. For example, if there $k$ gold standard articles in the extracted top $k$ articles, then the full accuracy refers to the accuracy of the top $k$ articles.
+
+We can see that, even if there is no guide over the article attention, the model still have reasonable performance over these evaluation indicators. When attention guidance is added, the performance improves significantly, and the performance keeps increasing as $\beta$ goes up. However, we find that charge classification performance does not always increases with the article attention performance, and the best result is achieved when $\beta=0.1$. This shows that there exists a tradeoff between the benefits of more accurate article attention and the less model capacity for charge classification due to the increased emphasis on the article attention performance.
+%The good performance shows that our model can put attention on the right articles if attention guidance is used.
+
+\begin{table}
+\centering
+\small{
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Model}				& \textbf{Precision} 				& \textbf{Recall} 				& \textbf{F1} 	\\
+\hline
+\textit{SVM} 				& \textbf{95.24}/54.97			& 40.40/34.58  					& 56.74/42.45 				 	\\
+\hline
+\textit{HAN}				& 83.10/70.58					& 59.60/54.75  					& 69.41/61.66					\\
+\hline
+\textbf{\textit{HAN\_article}}			& 81.58/\textbf{72.91}			& 63.27/\textbf{54.95} 			& 71.26/\textbf{62.67}					\\
+\hline
+\textbf{\textit{HAN\_guide\_article}} 	& 80.25/58.51 					& \textbf{65.66}/47.20 			& \textbf{72.22}/52.25 		 	\\
+\hline
+\end{tabular}
+}
+\caption{Results on News Data}
+\label{tabble_news_results}
+\end{table}
+
+\subsection{Performance on News Data}
+Since there are some differences between the words used in our daily life and the words used by legal practitioners, we manually annotated 100 news\footnote{the news is randomly selected from \url{http://www.news.cn/legal/} and \url{http://legal.people.com.cn/}} to see how the model trained on the judgement documents performs on the fact descriptions written by normal people. The results are shown in Table \ref{tabble_news_results}.
+
+We can see that although the SVM model has good performance on the judgement document data, it suffers from a significant performance drop in the news data. Recall that the SVM model is based on bag-of-words, this performance drop shows that there do exist a word usage gap between ordinary people and legal practitioners. As for our neural network models, although there also exists a performance drop, their performances are much better than the SVM model. This shows that the word usage gap can be solved by word embeddings to a great extent. 
+
+Also note that the model with guided article attention has better micro statistics but worse macro statistics than the model without guided article attention. This shows that the additional article attention guidance will make the model performance better on frequent charges but worse on infrequent ones. Recall that the relevant article extraction module also uses bag-of-words features, the quality of the top $k$ extract articles are much worse than the judgement document data (especially infrequent charges). Consider the situation where the key article related to an infrequent charge does not appear in the top $k$ articles, but a key article related to a similar frequent charge appears. Since the article attention guidance will make the model tend to attend more on the articles related to frequent charges, the model may instead attend on the wrong article that is related to a similar frequent charge and hence performs worse on infrequent charges.

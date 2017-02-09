@@ -1,0 +1,8 @@
+.DS_Store
+FormattingGuidelinesIJCAI-17
+*.log
+*.gz
+*.aux
+*.bbl
+*.blg
+*.doc
