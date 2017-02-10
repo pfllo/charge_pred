@@ -11,15 +11,16 @@
 In order to generate reasonable charge prediction, our approach follows four steps as depicted in Figure \ref{fig_model_framework}. 
 (1) The input fact description is fed to a document encoder to generate the fact embedding $\mathbf{d_f}$.
 (2) Concurrently, the input fact description is also passed to a relevant article extractor to find top $k$ relevant law articles. 
-(3) Each article is fed to another document encoder, and the article embeddings are further passed to an article aggregator to produce the aggregated article embedding $\mathbf{d_a}$. Meanwhile, three global attention vectors, i.e., $\mathbf{u_{aw}}$, $\mathbf{u_{as}}$ and $\mathbf{u_{ad}}$, are generated from the fact embedding $\mathbf{d_f}$ for the document encoder and the article aggregator. 
+(3) Each article is fed to another document encoder, and the article embeddings are further passed to an article aggregator to produce the aggregated article embedding $\mathbf{d_a}$. Meanwhile, three global context vectors, i.e., $\mathbf{u_{aw}}$, $\mathbf{u_{as}}$ and $\mathbf{u_{ad}}$, are generated from the fact embedding $\mathbf{d_f}$ for the document encoder and the article aggregator. 
 (4) Finally, $\mathbf{d_f}$ and $\mathbf{d_a}$ are concatenated and passed to a softmax classifier to predict the charge distribution of the input case.
 \orange{what is the best way to organize this section?}
 
 %The fact-based charge classification task can be formatted as a multi-label document classification task. The input is several sentences describing the facts of a case, and the output is multiple charges related to the case. Since usually multiple elements are required to constitute a charge (for example, the charge of acceptance of bribes requires the defendant to illegally accepts another person's money, and the defendant should also be a state functionary), the recurrent neural network (RNN) seems like a natural fit for the task. Considering the fact that only a small portion of the facts are crucial for the determination of charges, we also use attention mechanism in our model. Since the HAN model  satisfies many of our requirements except the multi-label classification capability, we use the framework of the HAN model for document embedding, but replace the output module and the loss function with ones that are compatible with the multi-label classification task. Furthermore, to take the information of article into account, we add another article attention module to incorporate the information of relevant articles to the model.
 
 \subsection{Document Encoder}
+\label{sec_doc_encoder}
 % Our document encoder module is based on the framework of Hierarchical Neural Network (HAN) proposed by \cite{yang2016hierarchical}. The overview of our document encoder is shown in Figure \ref{fig_doc_encoder}. 
-Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. As suggested by previous works \cite{tang2015document,yang2016hierarchical}, the document embedding problem can be converted to two sequence embedding problems, i.e., embedding sequence of words and embedding sequence of sentences (see Figure \ref{fig_doc_encoder}). Therefore, the key problem of document embedding lies in building an effective sequence encoder. \todo{describe Figure \ref{fig_doc_encoder} somewhere}
+Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. As suggested by previous works \cite{tang2015document,yang2016hierarchical}, the document embedding problem can be converted to two sequence embedding problems, i.e., embedding sequence of words and embedding sequence of sentences. Therefore, the key problem of document embedding lies in building an effective sequence encoder. As shown in Figure \ref{fig_doc_encoder}, we can first generate the embedding of each sentence using the sentence level sequence encoder, and then aggregate these sentences embeddings with document level sequence encoder to generate the document embedding $\mathbf{d}$. Although it is possible to use different models for these two sequence encoders, we simply use the same architecture here for simplicity.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -31,107 +32,114 @@ Intuitively, a sentence is a sequence of words and a document is a sequence of s
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.35\textwidth]{figures/document_encoder.png}	
+\includegraphics[width=0.4\textwidth]{figures/document_encoder.png}	
 \caption{Document Encoder}
 \label{fig_doc_encoder}
 \end{center}
 \end{figure}
 
 \paragraph{Bi-GRU Sequence Encoder} 
+One of the key challenges in building a sequence encoder is how to take the correlation of each elements into consideration. A promising solution is the bi-directional gated recurrent unit (Bi-GRU) model proposed by \cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
+Specifically, the Bi-GRU model first uses a forward and a backward GRU~\cite{cho2014learning} to encode the sequence in two opposite directions, and then concatenate the results of both GRUs to form the final outputs. 
 
+Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathbf{x}_t$ is the input embedding of the element at position $t$, the state of Bi-GRU at position $t$ is:
 
-It is important to consider the correlation of the elements when encoding a sequence. Here we use the bi-directional GRU model  for sequence encoding, which is an extension of the GRU model \cite{cho2014learning} that use a forward and a backward GRU to model the sequence separately, and then combine the results of both GRUs. Given a sequence $[x_1, x_2, ..., x_T]$ where $x_t$ is the embedding of the element at position $t$, the encoding result is:
-
-\begin{equation}
-%\overrightarrow{h}_t = \overrightarrow{GRU}(x_t)
-h_{ft} = GRU_f(x_{t})
-\end{equation}
-\begin{equation}
-%\overleftarrow{h}_t = \overleftarrow{GRU}(x_t)
-h_{bt} = GRU_b(x_{t})
-\end{equation}
 \begin{equation}
 %h_t = [\overrightarrow{h}_t , \overleftarrow{h}_t]
-h_t = [h_{ft}, h_{bt}]
+\mathbf{h}_t = [\mathbf{h}_{ft}, \mathbf{h}_{bt}]
 \end{equation}
-where $GRU_f$ is the forward GRU that processes the sequence from left to right, and $GRU_b$ is the backward GRU that processes the sequence from right to left. $h_t$ is the state of the bi-directional GRU model at time $t$, which is generated by concatenating the states of the two GRU models at time $t$. The state of a single GRU model at time $t$ is calculated by: 
+where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the state the forward and backward GRU at position $t$ respectively. And the state of a single GRU (take forward GRU as an example) is calculated by:
 \begin{equation}
-h_t=(1-z_t)\odot h_{t-1} + z_t\odot \tilde{h}_{t}
-\end{equation}
-with a little abuse of annotations, $h_t$ here stands for the state of time $t$ of a single GRU model. $z_t\in{[0,1]}$ is the update gate, $h_{t-1}$ is the previous state, $\tilde{h}_{t}$ is the candidate state and $\odot$ is element wise product. The update gate that controls the interpolation of the previous state and the candidate state is calculated by:
- \begin{equation}
-z_t=\sigma(W_z x_t+U_z h_{t-1} + b_z)
-\end{equation}
-where $x_t$ is the input at time $t$, $W_z$ and $U_z$ are weight matrices, $b_z$ is the bias and $\sigma$ is the sigmoid function. The candidate state $\tilde{h}_{t}$ is calculated by:
-\begin{equation}
-\tilde{h}_{t}=tanh(W_h x_t + r_t\odot U_h h_{t-1} + b_h)
-\end{equation}
-where $r_t$ is the reset gate, which is controls how information does the previous state contributes to the candidate state, and it is calculated by:
-\begin{equation}
-r_t=\sigma(W_r x_t + U_r h_{t-1} + b_r)
+\mathbf{h}_{ft}=(1-z_t)\odot \mathbf{h}_{f,t-1} + z_t\odot \tilde{\mathbf{h}}_{ft}
 \end{equation}
 
-
-
-\paragraph{Element Attention}
-Since not all elements of a sequence contributes equally to the final output, the attention mechanism is used to select the most import parts of a sequence. Given the GRU output $[h_1, h_2, ..., h_T]$ of a sequence, we calculate a sequence of attention values $[\alpha_1, \alpha_2, ..., \alpha_T]$ where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final embedding of the sequence is calculated as:
 \begin{equation}
-h = \sum_{t=1}^{T}{\alpha_t h_t}
+\tilde{\mathbf{h}}_{ft}=tanh(\mathbf{W}_h \mathbf{x}_t + r_t\odot \mathbf{U}_h \mathbf{h}_{f,t-1} + \mathbf{b}_h)
+\end{equation}
+
+\begin{equation}
+r_t=\sigma(\mathbf{W}_r \mathbf{x}_t + \mathbf{U}_r \mathbf{h}_{f,t-1} + b_r)
+\end{equation}
+
+\begin{equation}
+z_t=\sigma(\mathbf{W}_z \mathbf{x}_t+\mathbf{U}_z \mathbf{h}_{f,t-1} + b_z)
+\end{equation}
+where $\tilde{\mathbf{h}}_{ft}$ is the candidate state of position $t$, $z_t\in{[0,1]}$ is the update gate, $r_t\in{[0,1]}$ is the reset gate, $\mathbf{W}$ and $\mathbf{U}$ are weight matrices, $b$ is the bias, $\odot$ represents element wise product and $\sigma$ corresponds to the sigmoid function. The final sequence embedding is either the concatenation of $\mathbf{h}_{fT}$ and $\mathbf{h}_{b1}$, or simply the average of the average of $\mathbf{h}_t$.
+
+\paragraph{Attentive Sequence Encoder}
+\label{sec_att_seq_encoder}
+However, $[\mathbf{h}_{fT}, \mathbf{h}_{b1}]$ often fails to capture the whole semantic meaning when the sequence is long, and using the average of $\mathbf{h}_t$ also has the drawback that it treats useless elements equally with informative ones. 
+
+In similar spirit with \cite{yang2016hierarchical}, we also use a global context vector to attentively aggregate the elements in the sequence, but we further allow the global context vector to be dynamically generated when extra guidance is available (see Section \ref{sec_article_encoder}).
+
+
+The framework of our attentive sequence encoder is show in Figure \ref{fig_seq_encoder}. Given the Bi-GRU output sequence $[\mathbf{h}_1, \mathbf{h}_2, ..., \mathbf{h}_T]$, we calculate a sequence of attention values $[\alpha_1, \alpha_2, ..., \alpha_T]$ where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final embedding of the sequence is calculated by:
+\begin{equation}
+\mathbf{g} = \sum_{t=1}^{T}{\alpha_t \mathbf{h}_t}
 \label{seq_embed}
 \end{equation}
 where the attention value $\alpha_t$ is calculated by:
 \begin{equation}
-v_t = tanh(Wh_t)
+\mathbf{v}_t = tanh(\mathbf{W} \mathbf{h}_t)
 \label{eq_att_transform}
 \end{equation}
 \begin{equation}
-\alpha_t=\frac{exp(v_t^T u)}{\sum_t{exp(v_t^T u)}}
+\alpha_t=\frac{exp(\mathbf{v}_t^T \mathbf{u})}{\sum_t{exp(\mathbf{v}_t^T \mathbf{u})}}
 \label{gen_att}
 \end{equation}
-where $W$ is a weight matrix, and $u$ is global attention vector that is used to distinguish import elements from unimportant ones. 
+where $\mathbf{W}$ is a weight matrix, and $\mathbf{u}$ is the global context vector that is used to distinguish informative elements from non-informative ones. 
 
-\paragraph{Putting Everything Together}
-As shown in Figure \ref{doc_embed}, we first use the bi-directional GRU and a word-level attention vector $u_w$ to get the sentence embedding $s_i$. Then another bi-directional GRU and a sentence-level attention vector $u_s$ is applied to the sentence sequence $[s_1, s_2, ..., s_n]$ to get the document embedding $d$.
 
-\subsection{Generating Output}
-There are two commonly used methods for multi-label classification in neural network models. The first one is to consider the multi-label classification problem with $L$ labels as $L$ binary classification problem. It uses sigmoid function in the output layer and binary cross entropy as loss function. This method performs well in many multi-label text classification problems \cite{nam2014large}.
+\subsection{Using Law Articles}
+One of the difficulties of using law articles to support our charge prediction lies in the fact that statutory laws contain a large number of law articles, which makes complex classification models time-consuming in training, and run slowly in \orange{production environment} as well. 
 
-The second method uses the softmax function to generate outputs. It first convert the multi-label target to a probability distribution. For example, suppose there are 4 classes and one datum belongs to class 0 and class 2. This method will convert the $y=[1, 0, 1, 0]$ to $y=[0.5, 0, 0.5, 0]$, and cross entropy will be used as the loss function. After training, a threshold $\tau$ is selected and all the classes that have a score higher than $\tau$ will be considered as positive classes. This method proves to work well in the natural language query classification task \cite{kurata2016improved}. 
+Therefore, we propose a two-step approach to resolve this problem. Specifically, at the first step, we use a fast and easy-to-scale classifier to filter out a large fraction of irrelevant articles, and retain the top $k$ articles for the next step. Then, we use neural network to make more conprehensive understanding of the top $k$ articles, and use attention mechanism to select the most relevant ones for charge classification.
 
-In our pilot experiments, we find that the first method converges about 5 times slower than the second method in our dataset, and the second method also produces better results. We think this phenomenon happens because only a small fraction of our data are multi-label data. Therefore the second method, which uses the same output function as multi-class classification tasks, works better in our task. In this paper, we will use the second method.
+\paragraph{Top $k$ Article Extractor}
+\label{sec_article_extractor}
+We consider the relevant article extraction task as multiple binary classification tasks. Specifically, since 321 distinct law articles in the Chinese Criminal Law are mentioned in our dataset, we therefore build 321 binary classifiers where each classifier focuses on the relevance of a specific law article. Moreover, if more articles are considered (e.g. articles in the Anti-Drug Law of the People's Republic of China), we can simply add more binary classifiers accordingly, with the existing classifiers untouched.
 
-Specifically, if only fact description is used, the fact embedding $d$ is first passed to a multi-layer perceptron (MLP). The MLP output $d'$ is further fed to a softmax function to generate the class distribution $o$. The cross entropy loss function is:
+We use bag-of-words-based Support Vector Machine (SVM) as our binary classifier, which is fast and performs well in text classification~\cite{joachims2002learning,wang2012baselines}. Specifically, we use bag-of-words TF-IDF features, chi-square for feature selection and SVM with linear kernel for binary classification. The articles are ranked by the score output by SVM and the top $k$ articles are kept for each judgement document.
+
+\paragraph{Article Encoder}
+\label{sec_article_encoder}
+We use neural network method to make deeper understanding of the extracted top $k$ articles. 
+As shown in Figure \ref{fig_model_framework}, each article is first passed to a document encoder to generate the article embedding $\mathbf{a}_j, j\in [1, k]$. 
+While using similar architecure, this document encoder differs from the one used for fact embedding that, instead of using global context vectors, the word-level and sentence-level context vectors, i.e., $\mathbf{u_{aw}}$ and $\mathbf{u_{as}}$, are generated dynamically for each case from the fact embedding $d$:
+\begin{equation}
+\mathbf{u}_{aw} = \mathbf{W}_w \mathbf{d} + \mathbf{b}_w
+\end{equation}
+\begin{equation}
+\mathbf{u}_{as} = \mathbf{W}_s \mathbf{d} + \mathbf{b}_s
+\end{equation}
+where $\mathbf{W}$ is the weight matrix and $\mathbf{b}$ is the bias. The dynamic context vectors enables us to attend to informative words or sentences with respect to each specifica case, rather than just selecting \orange{generally informative ones}.
+
+\paragraph{Attentive Article Aggregator}
+The article aggregator aims to generate an aggregated embedding of the top $k$ articles, and the difficulty lies in how to attend more to relevant articles while ignore the irrelevant ones. 
+
+Due to the inferior classification ability of the relevant article extractor, the order of the top $k$ articles are not very meaningful. Therefore, the top $k$ articles are more of a set rather than a sequence. However, as suggested by \cite{vinyals2016matching}, when encoding a set, it is still beneficial to use bi-directional RNN to embed the context of each element.
+In our task, specifically, using bi-directional RNN is beneficial to model the co-existence tendency of among relevant articles.
+
+Therefore, we use the attentive sequence encoder described in Section \ref{sec_att_seq_encoder} to generate the aggregated article embedding $\mathbf{d}_a$. To attend to the relevant articles, we also dynamicall generate the context vector $\mathbf{u}_{ad}$ by:
+\begin{equation}
+\mathbf{u}_{ad} = \mathbf{W}_d \mathbf{d} + \mathbf{b}_d
+\end{equation}
+
+
+\subsection{Output and Loss Function}
+To generate the charge prediction, we first concatenate the document embedding $\mathbf{d}_f$ and the aggregated article embedding $\mathbf{d}_a$, and feed them to two full connection layer to generate a new vector $\mathbf{d}$. Then, $\mathbf{d}$ is passed to a softmax classifier to generate the predicted charge distribution. We use the validation set to determine a threshold $\tau$, and consider all the charges with a output probability higher than $\tau$ as positive predictions.
+
+Note that although various multi-label classification paradigms are applicable to our problem (see Section \ref{sec_related_work}), we use this method because it performs best in our pilot experiments. Also note that the input to the first full connection layer can also be $\mathbf{d}_f$ only, which meanings we do not use the information from relevant law articles (see comparison in Section \ref{sec_main_results}). 
+
+As for training, we use cross entropy as our loss function:
 \begin{equation}
 \label{original_loss}
-Loss_d= -\sum_{i=1}^N\sum_{l=1}^L{y_{il} log(o_{il})}
+Loss= -\sum_{i=1}^N\sum_{l=1}^L{y_{il} log(o_{il})}
 \end{equation} 
-where $N$ is the number of training data, $L$ is the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of the $l^{th}$ charge of the $i^{th}$ datum. 
+where $N$ is the number of training data, $L$ is the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ of datum $i$. Here the target charge distribution $\mathbf{y}$ is generated by setting positive labels to $\frac{1}{m}$ and negative labels to $0$, where $m$ is the number of positive labels.
 
-If both fact description and relevant law articles are used, the MLP input is the concatenation of of the fact embedding $d$ and the aggregated article embedding $d_a$ (see Section \ref{Embed Relevant Articles}).
-
-\subsection{Extracting Relevant Articles}
-\label{Extracting Relevant Articles}
-We consider the relevant article extraction task as a multi-label classification task. In our dataset, there are 321 law articles and we consider this task as 321 binary classification problems. 
-In this task, we use bag-of-words TF-IDF features. First, chi-square method is applied to the original feature set for feature selection. Then SVM with linear kernel is used for the binary classification. Finally, the articles are ranked by the score output by SVM and the top $k$ articles are kept for each judgement document.
-
-\subsection{Embed Relevant Articles}
-\label{Embed Relevant Articles}
-As shown in Figure \ref{fig_model_framework}, each article is first passed to the document embedding module to generate the article embedding $a_j, j\in [1, k]$. Different from the fact embedding module, the word level attention vector $u_{aw}$ and sentence level attention vector $u_{as}$ here are generated by linear transformations of the fact embedding $d$ rather than randomly initialization:
-\begin{equation}
-u_{aw} = W_w d + b_w
-\end{equation}
-\begin{equation}
-u_{as} = W_s d + b_s
-\end{equation}
-
-To model the phenomenon that some articles tend to co-exist while others may be exclusive to each other, we also consider the $k$ articles as a sequence, and the bi-GRU model is used to embed the context of each article. Similarly, we also generate an article level attention vector $u_{a}$ by:
-\begin{equation}
-u_a = W_a d + b_a
-\end{equation}
-and $u_a$ is further used to generate article attention using Equation \ref{eq_att_transform} and \ref{gen_att}. After that, Equation \ref{seq_embed} is used to generate the aggregated article embedding $d_a$. 
-
-\subsection{Guided Article Attention}
-Note that each judgement document also contains gold standard relevant law articles that can be applied to this case. Therefore, we can use this information to guide the article attention module. Specifically, given the $k$ articles returned by the relevant article extraction module, we want the article attention distribution $\alpha=[\alpha_1, \alpha_2, ..., \alpha_k]$ to simulate the target distribution $t\in\mathbb{R}^k$:
+\paragraph{Guided Article Attention}
+Note that each judgement document also contains gold standard law articles that can be applied to this case. Therefore, we can use this information to guide the attention of the attentive article aggregator during training. Specifically, given the $k$ articles, we want the article attention distribution $\bm{\alpha}=[\alpha_1, \alpha_2, ..., \alpha_k]$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$: \todo{can be simplified}
 \begin{equation}
 t_j=
 \begin{cases}
@@ -139,11 +147,18 @@ t_j=
 0,	& else
 \end{cases}
 \end{equation}
-where $\mathbb{A}$ is the set of indices of the articles in the top $k$ extracted articles that belongs to gold standard articles, and $|\mathbb{A}|$ is the size of set $\mathbb{A}$. 
+where $\mathbb{A}$ is the set of indices of the gold standard articles in the top $k$ extracted articles, and $|\mathbb{A}|$ is the size of set $\mathbb{A}$. 
 
 Therefore, the final loss function is:
 \begin{equation}
 \label{final_loss}
 Loss = -\sum_{i=1}^N(\sum_{l=1}^L{y_{il} log(o_{il})} + \beta \sum_{j=1}^k{t_{ij} log(\alpha_{ij})})
 \end{equation}
-where the left side is the cross entropy between the target charge distribution and the predicted charge distribution defined in Equation \ref{original_loss}, and the right side is the cross entropy between the target article distribution and the article attention distribution. 
+where $\beta$ is the weight vector used to control the importance of article attention guidance.
+
+
+% There are two commonly used methods for multi-label classification in neural network models. The first one is to consider the multi-label classification problem with $L$ labels as $L$ binary classification problem. It uses sigmoid function in the output layer and binary cross entropy as loss function. This method performs well in many multi-label text classification problems \cite{nam2014large}.
+
+% The second method uses the softmax function to generate outputs. It first convert the multi-label target to a probability distribution. For example, suppose there are 4 classes and one datum belongs to class 0 and class 2. This method will convert the $y=[1, 0, 1, 0]$ to $y=[0.5, 0, 0.5, 0]$, and cross entropy will be used as the loss function. After training, a threshold $\tau$ is selected and all the classes that have a score higher than $\tau$ will be considered as positive classes. This method proves to work well in the natural language query classification task \cite{kurata2016improved}. 
+
+% In our pilot experiments, we find that the first method converges about 5 times slower than the second method in our dataset, and the second method also produces better results. We think this phenomenon happens because only a small fraction of our data are multi-label data. Therefore the second method, which uses the same output function as multi-class classification tasks, works better in our task. In this paper, we will use the second method.
