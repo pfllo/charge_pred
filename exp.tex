@@ -148,7 +148,7 @@ However, the charge prediction performance (the last column) does not always inc
 
 
 \subsection{Performance on News Data}
-Since there are some differences between the words used in our daily life and the words used by legal practitioners, we manually annotated 100 news\footnote{the news is randomly selected from \url{http://www.news.cn/legal/} and \url{http://legal.people.com.cn/}} to see how the model trained on judgement documents performs on the fact descriptions written by \orange{normal people}. The results are shown in Table \ref{tabble_news_results}.
+Since there are some differences between the words used in our daily life and the words used by legal practitioners, we manually annotated 100 news, which contains an average of 261.79 words,\footnote{the news is randomly selected from \url{http://www.news.cn/legal/} and \url{http://legal.people.com.cn/}} to see how the model trained on judgement documents performs on the fact descriptions written by \orange{normal people}. The results are shown in Table \ref{tabble_news_results}.
 
 We can see that although the SVM model has good performance on the judgement document data, it suffers from a significant performance drop on news data.
 Recall that the SVM model is based on bag-of-words, this performance drop actually indicates an innegligible word usage gap between ordinary people and legal practitioners. However, the SVM model is very reliable when making predictions, which achieves 100\% precision on news tata, which further indicates that bag-of-words-based SVM only works well when the key words match the words in training data.

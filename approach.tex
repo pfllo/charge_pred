@@ -129,7 +129,8 @@ Therefore, we use the attentive sequence encoder described in Section \ref{sec_a
 \subsection{Output and Loss Function}
 To generate the charge prediction, we first concatenate the document embedding $\mathbf{d}_f$ and the aggregated article embedding $\mathbf{d}_a$, and feed them to two full connection layer to generate a new vector $\mathbf{d}$. Then, $\mathbf{d}$ is passed to a softmax classifier to generate the predicted charge distribution. We use the validation set to determine a threshold $\tau$, and consider all the charges with a output probability higher than $\tau$ as positive predictions.
 
-Note that although various multi-label classification paradigms are applicable to our problem (see Section \ref{sec_related_work}), we use this method because it performs best in our pilot experiments. Also note that the input to the first full connection layer can also be $\mathbf{d}_f$ only, which meanings we do not use the information from relevant law articles (see comparison in Section \ref{sec_main_results}). 
+% Note that although other multi-label classification paradigms are also applicable to our problem (see Section \ref{sec_related_work}), we use this method because it performs best in our pilot experiments. 
+Also note that the input to the first full connection layer can also be $\mathbf{d}_f$ only, which meanings we do not use the information from relevant law articles (see comparison in Section \ref{sec_main_results}). 
 
 As for training, we use cross entropy as our loss function:
 \begin{equation}
