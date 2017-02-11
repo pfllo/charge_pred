@@ -1,5 +1,8 @@
 \section{Introduction}
-Determining appropriate charges (like \emph{fraud}, \emph{theft}, and \emph{homicide}) of a case is helpful for legal assistance systems when the input is natural language. This is especially important when the user has no idea of the legal background of a case, where the only input he (or she) can give is the fact description of the case.
+Determining appropriate charges (like \emph{fraud}, \emph{theft}, and \emph{homicide}) of a case is helpful for legal assistance systems when the user has no idea of the legal background of a case, where the only input he (or she) can give is the fact description of the case, and when the user would like query the system by describing the case.
+For example, if the user wants to find similar cases, one can use the predicted charges of the query case to filter out irrelevant results. If the user wants to know possible penalties \orange{regarding the case}, one also need to decide appropriate charges first.
+
+
 For example, if the user interface is dialogue system, one can first determine suitable charges of the current case based on the user description, and then use this to guide the subsequent conversation. If the user wants to find similar cases, one can use the predicted charges of the query case to filter out irrelevant results. Furthermore, if one wants to build an end-to-end judgement suggestion system, where the input is the description of a case, he (or she) also needs to identify appropriate charges before suggesting corresponding penaties.
 % \todo{add end-to-end judgement suggestion system?} \todo{find examples}
 
@@ -23,7 +26,7 @@ To handle the multi-label nature of the problem, we convert the multi-label targ
 To get support from law articles, we first use a simple BOW-based article classifier to quickly filter out most irrelevant articles. Then we attentively aggregate the retained top $k$ articles for further classification with an additional attentive aggregation module.
 Although the top $k$ articles are noisy, the experimental results show that our attentive aggregation module can further attend to relevant ones and thus improve the prediction performance. 
 
-This work offers an effective way to predict appropriate charges of a case based solely on the fact descriptions. Our main contributions are: (1) We propose that the public judgement documents provides natural high-quality large-scale training data for tasks like fact-based charge prediction and relevant article extraction. (2) We propose a neural network model that can jointly utilize the case facts and the extracted relevant articles to for charge prediction. (3) By evaluating our model on human labeled news data, we show that the model trained on judgement documents have reasonable generalization ability on the text written by people who are not legal practitioners. \todo{polish this paragraph}
+This work offers an effective way to predict appropriate charges of a case based solely on the fact descriptions. Our main contributions are: (1) We propose that the public judgement documents provides natural high-quality large-scale training data for tasks like fact-based charge prediction and relevant article extraction. (2) We propose a neural network model that can jointly utilize the facts and the extracted relevant articles of a case to for charge prediction, where, to some extent, the ordering of the articles can be seen as legal support for the prediction. (3) By evaluating our model on human labeled news data, we show that the model trained on judgement documents have reasonable generalization ability on the text written by people who are not legal practitioners. \todo{polish this paragraph}
 
 
 
