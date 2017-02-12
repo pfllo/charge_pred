@@ -113,7 +113,7 @@ On the other hand, however, we still cannot trust its prediction results directl
 \hline
 \textit{0} 								& 60.94									& 50.76  									& 61.61 						& 89.59/79.23 	\\
 \hline
-\textit{0.01} 						& 77.96									& 66.77  									& 76.46							& 89.55/78.55 	\\
+\textit{0.01} 						& 76.34									& 66.66  									& 76.24							& 89.94/80.13 	\\
 \hline
 \textit{0.1} 							& 87.90									& 74.14  									& 83.39							& \textbf{90.21/80.48} 	\\
 \hline
@@ -125,14 +125,13 @@ On the other hand, however, we still cannot trust its prediction results directl
 \label{tab_article_att}
 \end{table}
 
-\subsection{Evaluating Article Attention}
-We can consider the article attention module as a re-ranking function over the extracted top $k$ articles, and then use the gold standard articles in the top $k$ articles to evaluate the re-ranking performance. Table \ref{tab_article_att} shows the model performance under different article attention loss weights ($\beta$ in Equation \ref{final_loss}). \texttt{Prec@1} refers to top 1 precision, and \emph{Prec\_Full} refers to full precision. For example, if there are $k'$ gold standard articles in the extracted top $k$ articles, then the full precision refers to the precision of the top $k$ articles.
 
-We can see that, even if there is no guidance over the article attention, our model still have reasonable performance over these evaluation indicators. When attention guidance is added, the attention quality improves significantly, and the performance keeps increasing as $\beta$ goes up.
-The fair performance of article attentions shows that, when predicting charges, our model can provide reasonable legal background as well.
-However, the charge prediction performance (the last column) does not always increase with the article attention quality, and the best result is achieved when $\beta=0.1$. This shows that there exists a tradeoff between the benefits of more accurate article attention and the less model capacity for charge classification due to the increased emphasis on the article attention performance.
-\todo{polish the last paragraph}
-%The good performance shows that our model can put attention on the right articles if attention guidance is used.
+\subsection{Evaluating Article Attention}
+We can consider the article attention module as a re-ranking function over the extracted top $k$ articles, and accordingly use the gold standard articles in the top $k$ articles to evaluate the re-ranking performance. Table \ref{tab_article_att} shows the model performance on article attention (column 2-4) and charge prediction (the last colum), (\orange{use comma?}) under different article attention loss weights ($\beta$ in Equation \ref{final_loss}). \texttt{Prec@1} refers to top 1 precision, and \texttt{Prec\_Full} refers to full precision. For example, if there are $k'$ gold standard articles in the extracted top $k$ articles, then \texttt{Prec\_Full} refers to the precision of the top $k$ articles.
+
+We can see that, even if there is no guidance over the article attention ($\beta=0$), our model still has reasonable performance over these evaluation indicators. When attention guidance is added, the attention quality improves significantly, and it keeps increasing as $\beta$ goes up.
+The \orange{fair} performance of the article attention indicates that, when predicting charges, our model can provide reasonable \orange{legal support} as well.
+However, the charge prediction performance does not always increase with the article attention quality, and the best result is achieved when $\beta=0.1$. This shows that there exists a tradeoff between the benefits of more accurate article attention and the less model capacity left for charge classification due to the increased emphasis on the article attention performance.
 
 \begin{table}
 \centering
@@ -154,7 +153,6 @@ However, the charge prediction performance (the last column) does not always inc
 \caption{Results on News Data}
 \label{tabble_news_results}
 \end{table}
-
 
 \subsection{Performance on News Data}
 Since there are some differences between the words used by \orange{laymen} and legal practitioners, 
