@@ -48,23 +48,25 @@ Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathb
 %h_t = [\overrightarrow{h}_t , \overleftarrow{h}_t]
 \mathbf{h}_t = [\mathbf{h}_{ft}, \mathbf{h}_{bt}]
 \end{equation}
-where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the state the forward and backward GRU at position $t$ respectively. And the state of a single GRU (take forward GRU as an example) is calculated by:
-\begin{equation}
-\mathbf{h}_{ft}=(1-z_t)\odot \mathbf{h}_{f,t-1} + z_t\odot \tilde{\mathbf{h}}_{ft}
-\end{equation}
+where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the state the forward and backward GRU at position $t$ respectively. 
 
-\begin{equation}
-\tilde{\mathbf{h}}_{ft}=tanh(\mathbf{W}_h \mathbf{x}_t + r_t\odot \mathbf{U}_h \mathbf{h}_{f,t-1} + \mathbf{b}_h)
-\end{equation}
+% And the state of a single GRU (take forward GRU as an example) is calculated by:
+% \begin{equation}
+% \mathbf{h}_{ft}=(1-z_t)\odot \mathbf{h}_{f,t-1} + z_t\odot \tilde{\mathbf{h}}_{ft}
+% \end{equation}
 
-\begin{equation}
-r_t=\sigma(\mathbf{W}_r \mathbf{x}_t + \mathbf{U}_r \mathbf{h}_{f,t-1} + b_r)
-\end{equation}
+% \begin{equation}
+% \tilde{\mathbf{h}}_{ft}=tanh(\mathbf{W}_h \mathbf{x}_t + r_t\odot \mathbf{U}_h \mathbf{h}_{f,t-1} + \mathbf{b}_h)
+% \end{equation}
 
-\begin{equation}
-z_t=\sigma(\mathbf{W}_z \mathbf{x}_t+\mathbf{U}_z \mathbf{h}_{f,t-1} + b_z)
-\end{equation}
-where $\tilde{\mathbf{h}}_{ft}$ is the candidate state of position $t$, $z_t\in{[0,1]}$ is the update gate, $r_t\in{[0,1]}$ is the reset gate, $\mathbf{W}$ and $\mathbf{U}$ are weight matrices, $b$ is the bias, $\odot$ represents element wise product and $\sigma$ corresponds to the sigmoid function. The final sequence embedding is either the concatenation of $\mathbf{h}_{fT}$ and $\mathbf{h}_{b1}$, or simply the average of the average of $\mathbf{h}_t$.
+% \begin{equation}
+% r_t=\sigma(\mathbf{W}_r \mathbf{x}_t + \mathbf{U}_r \mathbf{h}_{f,t-1} + b_r)
+% \end{equation}
+
+% \begin{equation}
+% z_t=\sigma(\mathbf{W}_z \mathbf{x}_t+\mathbf{U}_z \mathbf{h}_{f,t-1} + b_z)
+% \end{equation}
+% where $\tilde{\mathbf{h}}_{ft}$ is the candidate state of position $t$, $z_t\in{[0,1]}$ is the update gate, $r_t\in{[0,1]}$ is the reset gate, $\mathbf{W}$ and $\mathbf{U}$ are weight matrices, $b$ is the bias, $\odot$ represents element wise product and $\sigma$ corresponds to the sigmoid function. The final sequence embedding is either the concatenation of $\mathbf{h}_{fT}$ and $\mathbf{h}_{b1}$, or simply the average of the average of $\mathbf{h}_t$.
 
 \paragraph{Attentive Sequence Encoder}
 \label{sec_att_seq_encoder}
