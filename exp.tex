@@ -45,12 +45,12 @@ The feature selector in the top $k$ article extractor model keeps the top 2,000 
 \hline
 \end{tabular}
 }
-\caption{Main Results. $^*$ means we use gold standard relevant law articles, which are not available in \orange{production environment}.}
+\caption{Charge Prediction Results. $^*$ means we use gold standard relevant law articles, which are not available in \orange{production environment}.}
 \label{tabble_main_results}
 \end{table}
 
 
-\subsection{Main Results}
+\subsection{Charge Prediction Results}
 \label{sec_main_results}
 We compare our method with a baseline BOW-based SVM method, which is similar to the one used for top $k$ article extractor, except that the outputs are charges rather than articles. The results are summarized in Table \ref{tabble_main_results}. The left side of the slash refers to the micro statistics, and the right side refers to the macro statistics. Specifically micro precision (or recall) is the the number of correct charge predictions divided by the total number of charge predictions (or the total number of gold standard charges), while the macro precision (or recall) is the sum of the precision (or recall) of each charge divided by the number of distinct charges in test set. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
 
@@ -76,8 +76,8 @@ Also note that \texttt{NN\_gold\_only} is not as good as \texttt{NN\_gold\_artic
 % Recall that using only facts as input, the results of \texttt{NN} is promising, showing that although the legal system of China is mainly based on civil law system, the judgements are still consistent with the facts enough for our model to implicitly learn the legal logic behind the judgement.
 % which to some extent indicates a reasonable consistency of Chinese judges in making judgements. 
 
-
-\subsection{Performance of Top $k$ Article Extraction}
+\subsection{Article Related Results}
+\paragraph{Top $k$ Article Extraction}
 \begin{table}
 \centering
 \normalsize{
@@ -91,7 +91,7 @@ Also note that \texttt{NN\_gold\_only} is not as good as \texttt{NN\_gold\_artic
 \hline
 \end{tabular}
 }
-\caption{Top $k$ Article Extraction Result}
+\caption{Top $k$ Article Extraction Performance}
 \label{tab_article_extraction}
 \end{table}
 
@@ -113,7 +113,7 @@ On the other hand, however, we still cannot trust its prediction results directl
 \hline
 \textit{0} 								& 60.94									& 50.76  									& 61.61 						& 89.59/79.23 	\\
 \hline
-\textit{0.01} 						& 76.34									& 66.66  									& 76.24							& 89.94/80.13 	\\
+\textit{0.01} 						& 81.06									& 68.61  									& 78.00							& 89.77/79.48 	\\
 \hline
 \textit{0.1} 							& 87.90									& 74.14  									& 83.39							& \textbf{90.21/80.48} 	\\
 \hline
@@ -121,12 +121,12 @@ On the other hand, however, we still cannot trust its prediction results directl
 \hline
 \end{tabular}
 }
-\caption{Article Attention Evaluation}
+\caption{Article Attention Performance}
 \label{tab_article_att}
 \end{table}
 
 
-\subsection{Evaluating Article Attention}
+\paragraph{Article Attention}
 We can consider the article attention module as a re-ranking function over the extracted top $k$ articles, and accordingly use the gold standard articles in the top $k$ articles to evaluate the re-ranking performance. Table \ref{tab_article_att} shows the model performance on article attention (column 2-4) and charge prediction (the last colum), (\orange{use comma?}) under different article attention loss weights ($\beta$ in Equation \ref{final_loss}). \texttt{Prec@1} refers to top 1 precision, and \texttt{Prec\_Full} refers to full precision. For example, if there are $k'$ gold standard articles in the extracted top $k$ articles, then \texttt{Prec\_Full} refers to the precision of the top $k$ articles.
 
 We can see that, even if there is no guidance over the article attention ($\beta=0$), our model still has reasonable performance over these evaluation indicators. When attention guidance is added, the attention quality improves significantly, and it keeps increasing as $\beta$ goes up.
