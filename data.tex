@@ -1,6 +1,6 @@
 \section{Data Preparation} 
 Our data are collected from China Judgements Online\footnote{\url{http://wenshu.court.gov.cn}}. The Chinese government has been publishing judgement documents on it since 2013.
-We randomly choose 50,000 judgements as training data, 5,000 for validation and 5,000 for test. To ensure enough training data for each charge, we only keep the charges that appear more than 50 times in the training data. As for law articles, we only consider the ones in the Criminal Law of the People's Republic of China. The resulting dataset contains 50 distinct charges and 321 distinct articles. About 3.56\% cases contain more than one charges, and 94.18\% cases contain more than one law articles. 
+We randomly choose 50,000 judgements as training data, 5,000 for validation and 5,000 for test. To ensure enough training data for each charge, we only keep the charges that appear more than 80 times in the training data. As for law articles, we only consider the ones in the Criminal Law of the People's Republic of China. The resulting dataset contains 50 distinct charges and 321 distinct articles. About 3.56\% cases contain more than one charges, and 94.18\% cases contain more than one law articles. 
 % \orange{An average case has 1.03 charges and 3.81 law articles}. 
 The facts part of each judgement contains 382.60 words on average.
 % , and 14.21 sentences on average.
