@@ -1,16 +1,17 @@
 \section{Introduction}
-Determining appropriate charges (like \emph{fraud}, \emph{larceny}, and \emph{homicide}) of a case is helpful for legal assistance systems when the user would like to query the system by describing the case, and it is even more important when the user has no idea of the legal background of a case, where the only input he (or she) can give is the fact description of the case. 
+Determining appropriate charges (like \emph{fraud}, \emph{larceny}, and \emph{homicide}) of a case is helpful for legal assistance systems when the user would like to query the system by describing the case, and it is \orange{even more important} when the user has no idea of the legal basis of a case, where the only input he (or she) can give is the fact description of the case. 
 % In this situation, predicting appropiate charges would help us to provide the user with relevant  
 For example, if the user wants to find similar cases, one can use the predicted charges of the query case to filter out irrelevant results. And if the user wants to know the possible penalties \orange{regarding a case}, one also need to decide appropriate charges first.
 
 
 In these situations, we need to predict appropirate charges based solely on the fact descriptions of a case. 
-However, this fact-based charge prediction task is not easy:
-(1) The differences between two charges can sometimes be subtle. For example, in the context criminal cases in China, distinguishing \emph{intentional homicide} from \emph{negligent homicide} involves detailed analysis of the behavior of the defendant, and \emph{acceptance of bribes} differs from \emph{acceptance of bribes by a non-state functionary} in the occupation of the defendant. 
+However, this charge prediction task is not easy:
+(1) The differences between two charges can sometimes be subtle. For example, in the context of criminal cases in China, distinguishing \emph{intentional homicide} from \emph{negligent homicide} would require detailed analysis of the behavior of the defendant.
+% and \emph{acceptance of bribes} differs from \emph{acceptance of bribes by a non-state functionary} in the occupation of the defendant. 
 (2) Multiple crimes may be involved in a single case, which means we need to conduct charge prediction in the multi-label classification paradigm. 
-(3)  Although we can expect the model to implicitly learn the legal background of the judgement through massive training data, the charge prediction is still not convincing enough if no law articles are involved in the prediction. This problem is prominent in countries using civil law system, e.g., China (except Hong Kong), where the judgement is made only based on statutory law. 
+(3)  Although we can expect the model to implicitly learn the legal basis of the judgement through massive training data, the predicted charges are still not convincing enough if no law articles are involved in the prediction. This problem is prominent in countries using civil law system, e.g., China (except Hong Kong), where the judgement is made only based on statutory laws. 
 For example, as shown in Figure \ref{fig_example_case}, a judgement document in China always includes relevant law articles (usually in the court view part) to support the decision.  
-Even in countries using common law system, e.g., the United States (except Louisiana), where the judgement is based mainly on decisions of previous cases, there are still some statutory laws that need to be followed when making judgements. 
+Even in countries using common law system, e.g., the United States (except Louisiana), where the judgement is based mainly on decisions of previous cases, there are still some statutory laws that need to be followed when making decisions. 
 
 % Therefore, to solve this problem, we need a multi-label classification model, that can effectively capture the overall \orange{framework} along with important details of the fact description, and is able to extract and utilize relevant law articles to build the bridge from the fact description to appropriate charges as well. 
 
