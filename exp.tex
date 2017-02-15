@@ -45,7 +45,7 @@ The chi-square feature selector keeps the top 2,000 features.
 \hline
 \end{tabular}
 }
-\caption{Charge Prediction Results. $^*$ means we use gold standard relevant law articles, which are not available in \orange{production environment}.}
+\caption{Charge Prediction Results. $^*$ refers to gold standard articles, which are not available in \orange{production environment}.}
 \label{tabble_main_results}
 \end{table}
 
@@ -75,6 +75,11 @@ Also note that \texttt{NN\_gold\_only} is not as good as \texttt{NN\_gold\_artic
 
 % Recall that using only facts as input, the results of \texttt{NN} is promising, showing that although the legal system of China is mainly based on civil law system, the judgements are still consistent with the facts enough for our model to implicitly learn the legal logic behind the judgement.
 % which to some extent indicates a reasonable consistency of Chinese judges in making judgements. 
+
+\paragraph{Case Study}
+When looking more closely at the prediction results, we find that \texttt{NN} clearly improves the performance over \texttt{SVM} on the charges with subtle differences. For example, when the victim is dead, \emph{intentional homicide} distinguishes from \emph{intentional injury} mainly in whether the defendant is intended to kill the victim or not. In this situation, \texttt{NN} improves \texttt{SVM} by using RNN and attention mechanism to better understand the text. 
+On the other hand, while \texttt{NN\_guide\_article} also improves \texttt{NN} on these this kind of charges, a \orange{considerable} amount of improvements comes from the charges that can be confused with multiple charges, e.g., \emph{intentional injury} is also often confused with \emph{picking quarrels and provoking troubles} since there will also be injuries in the latter one, indicating that the additional information from relevant law articles can help the model handle the difficult charges better.
+
 
 \subsection{Article Related Results}
 \paragraph{Top $k$ Article Extraction}

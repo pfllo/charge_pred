@@ -6,7 +6,9 @@ For example, if the user wants to find similar cases, one can use the predicted 
 
 In these situations, we need to predict appropirate charges based solely on the fact descriptions of a case. 
 However, this charge prediction task is not easy:
-(1) The differences between two charges can sometimes be subtle. For example, in the context of criminal cases in China, distinguishing \emph{intentional homicide} from \emph{negligent homicide} would require detailed analysis of the behavior of the defendant.
+(1) The differences between two charges can sometimes be subtle. For example, in the context of criminal cases in China, 
+distinguishing \emph{intentional homicide} from \emph{intentional injury} would require determining whether the defendant is intended to kill the victim in the cases where the victim is dead.
+% distinguishing \emph{intentional homicide} from \emph{negligent homicide} would require detailed analysis of the behavior of the defendant.
 % and \emph{acceptance of bribes} differs from \emph{acceptance of bribes by a non-state functionary} in the occupation of the defendant. 
 (2) Multiple crimes may be involved in a single case, which means we need to conduct charge prediction in the multi-label classification paradigm. 
 (3)  Although we can expect the model to implicitly learn the legal basis of the judgement through massive training data, the predicted charges are still not convincing enough if no law articles are involved in the prediction. This problem is prominent in countries using civil law system, e.g., China (except Hong Kong), where the judgement is made only based on statutory laws. 
