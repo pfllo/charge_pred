@@ -77,8 +77,14 @@ Also note that \texttt{NN\_gold\_only} is not as good as \texttt{NN\_gold\_artic
 % which to some extent indicates a reasonable consistency of Chinese judges in making judgements. 
 
 \paragraph{Case Study}
-When looking more closely at the prediction results, we find that \texttt{NN} clearly improves the performance over \texttt{SVM} on the charges with subtle differences. For example, when the victim is dead, \emph{intentional homicide} distinguishes from \emph{intentional injury} mainly in whether the defendant is intended to kill the victim or not. In this situation, \texttt{NN} improves \texttt{SVM} by using RNN and attention mechanism to better understand the text. 
-On the other hand, while \texttt{NN\_guide\_article} also improves \texttt{NN} on these this kind of charges, a \orange{considerable} amount of improvements comes from the charges that can be confused with multiple charges, e.g., \emph{intentional injury} is also often confused with \emph{picking quarrels and provoking troubles} since there will also be injuries in the latter one, indicating that the additional information from relevant law articles can help the model handle the difficult charges better.
+We find that there exist some star-like confusion patterns among the charges in our dataset. For example, \emph{intentional injury} (\emph{pivot charges}) can be confused with multiple charges (\emph{peripheral charges}) like \emph{intentional homicide} (when the victim is dead, it differs from \emph{intentional injury} in whether the defendant is intended to kill the victim) and \emph{picking quarrels and provoking troubles} (there may also exist injuries here). 
+% We refer to charges can be confused with multiple charges as \emph{pivot charges}, and the charge often confused with a single charge as \emph{peripheral charges} here.
+Since these charges share similar fact descriptions, e.g, how the injuries are caused, \texttt{SVM} performs bad in distinguishing peripheral charges.  
+However, by using RNN and attention mechanism, \texttt{NN} can attend to important details of the facts and significantly improves the performance on these peripheral charges. 
+On the other hand, these learned patterns are not reliable enough, and lead to little improvements on pivot charges.
+As for \texttt{NN\_guide\_article}, it allows interactions between facts and law articles, and therefore generates more elaborated patterns, which significantly improve the pivot charges while less prominent improvements on other easily confused charges are made as well.
+
+% On the other hand, while \texttt{NN\_guide\_article} also improves \texttt{NN} on these this kind of charges, a \orange{considerable} amount of improvements comes from the charges that can be confused with multiple charges, e.g., \emph{intentional injury} is also often confused with \emph{picking quarrels and provoking troubles} since there will also be injuries in the latter one, indicating that the additional information from relevant law articles can help the model handle the difficult charges better.
 
 
 \subsection{Article Related Results}
