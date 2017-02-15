@@ -12,7 +12,7 @@
 Our approach follows four steps as depicted in Figure \ref{fig_model_framework}. 
 (1) The input fact description is fed to a document encoder to generate the fact embedding $\mathbf{d_f}$.
 (2) Concurrently, the input fact description is also passed to a relevant article extractor to find top $k$ relevant law articles. 
-(3) The article are fed to another document encoder, and the article embeddings are further passed to an article aggregator to produce the aggregated article embedding $\mathbf{d_a}$. Meanwhile, three global context vectors, i.e., $\mathbf{u_{aw}}$, $\mathbf{u_{as}}$ and $\mathbf{u_{ad}}$, are generated from $\mathbf{d_f}$ for the article document encoder and the article aggregator. 
+(3) The article are fed to another document encoder, and the article embeddings are further passed to an article aggregator to produce the aggregated article embedding $\mathbf{d_a}$. Meanwhile, three context vectors, i.e., $\mathbf{u_{aw}}$, $\mathbf{u_{as}}$ and $\mathbf{u_{ad}}$, are dynamically generated from $\mathbf{d_f}$ for the article document encoder and the article aggregator. 
 (4) Finally, $\mathbf{d_f}$ and $\mathbf{d_a}$ are concatenated and passed to a softmax classifier to predict the charge distribution of the input case.
 
 %The fact-based charge classification task can be formatted as a multi-label document classification task. The input is several sentences describing the facts of a case, and the output is multiple charges related to the case. Since usually multiple elements are required to constitute a charge (for example, the charge of acceptance of bribes requires the defendant to illegally accepts another person's money, and the defendant should also be a state functionary), the recurrent neural network (RNN) seems like a natural fit for the task. Considering the fact that only a small portion of the facts are crucial for the determination of charges, we also use attention mechanism in our model. Since the HAN model  satisfies many of our requirements except the multi-label classification capability, we use the framework of the HAN model for document embedding, but replace the output module and the loss function with ones that are compatible with the multi-label classification task. Furthermore, to take the information of article into account, we add another article attention module to incorporate the information of relevant articles to the model.
@@ -109,25 +109,31 @@ We use bag-of-words-based SVM as our binary classifier, which is fast and perfor
 
 \paragraph{Article Encoder}
 \label{sec_article_encoder}
-Since each law article may contain multiple sentences, as shown in Figure \ref{fig_model_framework}, we also use the document encoder described in Section \ref{sec_doc_encoder} to generate the embedding $\mathbf{a}_j, j\in [1, k]$ for the top $k$ articles. 
-While using similar architecure, this document encoder differs from the one used for fact embedding that, instead of using global context vectors, the word-level and sentence-level context vectors, i.e., $\mathbf{u_{aw}}$ and $\mathbf{u_{as}}$, which are used to produce word-level and sentence-level attention values respectively, are generated dynamically for each case from the fact embedding $d$:
+Since each law article may contain multiple sentences, as shown in Figure \ref{fig_model_framework}, we also use the document encoder described in Section \ref{sec_doc_encoder} to generate the article embedding $\mathbf{a}_j, j\in [1, k]$ for the top $k$ articles. 
+While using similar architecure, this document encoder differs from the one used for fact embedding that, instead of using global context vectors, its word-level context vector $\mathbf{u_{aw}}$ and sentence-level context vector $\mathbf{u_{as}}$ are generated dynamically for each case from the fact embedding $\mathbf{d}_f$:
 \begin{equation}
-\mathbf{u}_{aw} = \mathbf{W}_w \mathbf{d} + \mathbf{b}_w;\ \ \ \ \mathbf{u}_{as} = \mathbf{W}_s \mathbf{d} + \mathbf{b}_s
+\mathbf{u}_{aw} = \mathbf{W}_w \mathbf{d}_f + \mathbf{b}_w;\ \ \ \ \mathbf{u}_{as} = \mathbf{W}_s \mathbf{d}_f + \mathbf{b}_s
 \label{eq_dynamic_context_vec}
 \end{equation}
-where $\mathbf{W}$ is the weight matrix and $\mathbf{b}$ is the bias. The dynamic context vectors enables us to attend to informative words or sentences with respect to the facts of each case, rather than just selecting \orange{generally informative ones}.
+where $\mathbf{W}$ is the weight matrix and $\mathbf{b}$ is the bias. 
+The context vectors, i.e., $\mathbf{u_{aw}}$ and $\mathbf{u_{as}}$, are then used to produce word-level and sentence-level attention values respectively.
+By dynamically generating context vectors, the fact embedding $\mathbf{d}_f$ actually guide the model to attend to informative words or sentences with respect to the facts of each case, rather than just selecting \orange{generally informative ones}.
+
+
 
 \paragraph{Attentive Article Aggregator}
 The article aggregator aims to generate an aggregated embedding for the top $k$ articles. Since not all the articles are relevant, the difficulty here is how to distinguish relevant articles from irrelevant ones.
 % attend more to relevant articles while trying to ignore the irrelevant ones. 
 
-Due to the inferior classification ability of the relevant article extractor, the order of the top $k$ articles are not \orange{very meaningful}. Therefore, the top $k$ articles are more of a set than a sequence. However, as suggested by \cite{vinyals2016matching}, when encoding a set, it is still beneficial to embed the context of each element with a bidirectional RNN.
-In our task, specifically, using bi-directional RNN is beneficial to model the co-existence tendency of relevant articles.
+% Due to the inferior classification ability of the relevant article extractor, the order of the top $k$ articles are not \orange{very meaningful}. Therefore, the top $k$ articles are more of a set than a sequence. 
+Due to the unreliability of the order of the top $k$ articles, these articles are more of a set than a sequence.
+However, as suggested by \cite{vinyals2016matching}, when encoding a set, it is still beneficial to embed the context of each element with a bidirectional RNN.
+In our task, specifically, using bi-directional RNN is beneficial to model the co-occurence tendency of relevant articles.
 
 Therefore, we use the attentive sequence encoder in Section \ref{sec_att_seq_encoder} to generate the aggregated article embedding $\mathbf{d}_a$. Again, to guide the attention with fact descriptions, we also dynamicall generate the article-level context vector $\mathbf{u}_{ad}$ by:
 % Equation \ref{eq_dynamic_context_vec}, but with another set of parameters.
 \begin{equation}
-\mathbf{u}_{ad} = \mathbf{W}_d \mathbf{d} + \mathbf{b}_d
+\mathbf{u}_{ad} = \mathbf{W}_d \mathbf{d}_f + \mathbf{b}_d
 \end{equation}
 
 
@@ -144,8 +150,8 @@ Loss= -\sum_{i=1}^N\sum_{l=1}^L{y_{il} log(o_{il})}
 \end{equation} 
 where $N$ is the number of training data, $L$ is the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ of datum $i$. Here the target charge distribution $\mathbf{y}$ is generated by setting positive labels to $\frac{1}{m}$ and negative labels to $0$, where $m$ is the number of positive labels.
 
-\paragraph{Guided Article Attention}
-Since the judgement documents also contain gold standard relevant law articles, we can further use this information to guide the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold standard articles in the top $k$ extractions.
+\paragraph{Supervised Article Attention}
+Since the judgement documents also contain gold standard relevant law articles, we can further use this information to \orange{supervise} the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold standard articles in the top $k$ extractions.
 
 % : \todo{can be simplified}
 % \begin{equation}
@@ -162,7 +168,7 @@ We still use cross entropy here, and the loss function is:
 \label{final_loss}
 Loss = -\sum_{i=1}^N(\sum_{l=1}^L{y_{il} log(o_{il})} + \beta \sum_{j=1}^k{t_{ij} log(\alpha_{ij})})
 \end{equation}
-where $\beta$ is the weight for article attention guidance loss.
+where $\beta$ is the weight for article attention loss.
 
 
 % There are two commonly used methods for multi-label classification in neural network models. The first one is to consider the multi-label classification problem with $L$ labels as $L$ binary classification problem. It uses sigmoid function in the output layer and binary cross entropy as loss function. This method performs well in many multi-label text classification problems \cite{nam2014large}.

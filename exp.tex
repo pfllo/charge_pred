@@ -29,7 +29,7 @@ The chi-square feature selector keeps the top 2,000 features.
 \hline
 \textit{NN\_article}			& 90.79/83.07					& 88.42/75.73  					& 89.59/79.23					\\
 \hline
-\textbf{\textit{NN\_guide\_article}} 	& 91.80/82.44 					& \textbf{88.67/78.62} 			& \textbf{90.21/80.48} 		 	\\
+\textbf{\textit{NN\_supv\_article}} 	& 91.80/82.44 					& \textbf{88.67/78.62} 			& \textbf{90.21/80.48} 		 	\\
 \hline
 \hline
 \textit{SVM\_gold\_article$^*$} 	& \textbf{98.97}/94.58			& 95.39/83.21  					& 97.15/88.53					\\
@@ -61,7 +61,7 @@ We can see that, the basic \texttt{SVM} model, which only use facts as input, pr
 % If we only use the gold standard articles of each case for classification (\texttt{SVM\_only\_gold}), the micro F1 can be further improved to 98.35, which further indicates that the SVM model has bad resistence to noise. \todo{is \texttt{\_only\_gold} necessary?}
 
 On the other hand, since our attentive article aggregator has the ability to distinguish relevant articles from extraction mistakes, our neural network (NN) model (\texttt{NN\_article}) can make use of the noisy article extractions, and improve the performance over the model using only facts as input (\texttt{NN}), which has already ourperfroms \texttt{SVM} by a large margin.
-Furthermore, if we use the gold standard articles to guide the article attention during training (\texttt{NN\_guided\_article}), the performance can be further improved.
+Furthermore, if we use the gold standard articles to \orange{supervise} the article attention during training (\texttt{NN\_supv\_article}), the performance can be further improved.
 Similar to SVM models, if we use gold standard articles (\texttt{NN\_gold\_article}) instead of extracted ones, there will exist a clear improvement as well, and without surprise, it also outperforms \texttt{SVM\_gold\_article}.
 Also note that, compared with the corresponding SVM models, the improvements made by our NN architecture are most prominent in macro statistics, showing that the the SVM model has a \orange{strong} bias towards frequent charges, while the NN models have a more balanced performance between frequent and infrequent ones. This is probably due to the nature of the BOW feature, which is unable to handle synonyms. However, since our NN model takes pre-trained word embeddings as input, it can better understand the meaning of a word even when it is rare in the training data. 
 
@@ -71,7 +71,7 @@ We also evaluate our NN model with only articles as input. Specifically, the rel
 This actually indicates the nature of civil law system that judgements are made based on statutory laws rather than decisions of previous cases.
 However, we can see that the performance of \texttt{NN} is also promising, showing that although the judgments are based on statutory laws, our model can still learn the legal logic behind this implicitly through only the (facts, charges) paris. 
 Also note that \texttt{NN\_gold\_only} is not as good as \texttt{NN\_gold\_article}, showing that the facts can provide additional information for charge prediction even if we use gold standard law articles.
-% \orange{And the big gap between \texttt{NN\_guided\_article} and \texttt{NN\_gold\_article} indicates that there is still much room that our article extraction and embedding part can improve.}
+% \orange{And the big gap between \texttt{NN\_supv\_article} and \texttt{NN\_gold\_article} indicates that there is still much room that our article extraction and embedding part can improve.}
 
 % Recall that using only facts as input, the results of \texttt{NN} is promising, showing that although the legal system of China is mainly based on civil law system, the judgements are still consistent with the facts enough for our model to implicitly learn the legal logic behind the judgement.
 % which to some extent indicates a reasonable consistency of Chinese judges in making judgements. 
@@ -80,11 +80,11 @@ Also note that \texttt{NN\_gold\_only} is not as good as \texttt{NN\_gold\_artic
 We find that there exist some star-like confusion patterns among the charges in our dataset. For example, \emph{intentional injury} (\emph{pivot charges}) can be confused with multiple charges (\emph{peripheral charges}) like \emph{intentional homicide} (when the victim is dead, it differs from \emph{intentional injury} in whether the defendant is intended to kill the victim) and \emph{picking quarrels and provoking troubles} (there may also exist injuries here). 
 % We refer to charges can be confused with multiple charges as \emph{pivot charges}, and the charge often confused with a single charge as \emph{peripheral charges} here.
 Since these charges share similar fact descriptions, e.g, how the injuries are caused, \texttt{SVM} performs bad in distinguishing peripheral charges.  
-However, by using RNN and attention mechanism, \texttt{NN} can attend to important details of the facts and significantly improves the performance on these peripheral charges. 
+However, by using GRU and attention mechanism, \texttt{NN} can attend to important details of the facts and significantly improves the performance on these peripheral charges. 
 On the other hand, these learned patterns are not reliable enough, and lead to little improvements on pivot charges.
-As for \texttt{NN\_guide\_article}, it allows interactions between facts and law articles, and therefore generates more elaborated patterns, which significantly improve the pivot charges while less prominent improvements on other easily confused charges are made as well.
+As for \texttt{NN\_supv\_article}, it allows interactions between facts and law articles, and therefore generates more elaborated patterns, which significantly improve the pivot charges while less prominent improvements on other easily confused charges are made as well.
 
-% On the other hand, while \texttt{NN\_guide\_article} also improves \texttt{NN} on these this kind of charges, a \orange{considerable} amount of improvements comes from the charges that can be confused with multiple charges, e.g., \emph{intentional injury} is also often confused with \emph{picking quarrels and provoking troubles} since there will also be injuries in the latter one, indicating that the additional information from relevant law articles can help the model handle the difficult charges better.
+% On the other hand, while \texttt{NN\_supv\_article} also improves \texttt{NN} on these this kind of charges, a \orange{considerable} amount of improvements comes from the charges that can be confused with multiple charges, e.g., \emph{intentional injury} is also often confused with \emph{picking quarrels and provoking troubles} since there will also be injuries in the latter one, indicating that the additional information from relevant law articles can help the model handle the difficult charges better.
 
 
 \subsection{Article Related Results}
@@ -140,7 +140,7 @@ On the other hand, however, we still cannot trust its prediction results directl
 \paragraph{Article Attention}
 We can consider the article attention module as a re-ranking function over the extracted top $k$ articles, and accordingly use the gold standard articles in the $k$ articles to evaluate the re-ranking performance. Table \ref{tab_article_att} shows the model performance on article attention (column 2-4) and charge prediction \orange{(colum 5), under different} article attention loss weights ($\beta$ in Equation \ref{final_loss}). \texttt{Prec@1} refers to top 1 precision, and \texttt{Prec\_Full} refers to full precision. For example, if there are $k'$ gold standard articles in the retained $k$ articles, then \texttt{Prec\_Full} refers to the precision of the top $k'$ articles.
 
-We can see that, even if there is no guidance over the article attention ($\beta=0$), our model still has reasonable performance on re-ranking the $k$ articles. When attention guidance is added, the attention quality improves significantly, and it keeps increasing as $\beta$ goes up.
+We can see that, even if there is no supervision over the article attention ($\beta=0$), our model still has reasonable performance on re-ranking the $k$ articles. When attention supervision is added, the attention quality improves significantly, and it keeps increasing as $\beta$ goes up.
 The \orange{fair} performance of the article attention indicates that our model can provide reasonable legal basis to support the charge prediction.
 However, the charge prediction performance does not always increase with the article attention quality, and the best result is achieved when $\beta=0.1$. This shows that there exists a tradeoff between the benefits of more accurate article attention and the less model capacity left for charge classification due to the increased emphasis on the article attention performance.
 
@@ -157,7 +157,7 @@ However, the charge prediction performance does not always increase with the art
 \hline
 \textbf{\textit{NN\_article}}					& 87.18/\textbf{75.24}			& 66.67/\textbf{60.37} 		& 75.56/\textbf{66.99}					\\
 \hline
-\textbf{\textit{NN\_guide\_article}} 	& 90.00/68.72 							& \textbf{70.59}/57.50 		& \textbf{79.12}/62.61 		 	\\
+\textbf{\textit{NN\_supv\_article}} 	& 90.00/68.72 							& \textbf{70.59}/57.50 		& \textbf{79.12}/62.61 		 	\\
 \hline
 \end{tabular}
 }
@@ -175,12 +175,12 @@ Recall that the SVM model is based on BOW, this performance drop actually indica
 However, the high micro precision of \texttt{SVM} indicates that, although cannot generalizes well, the patterns learned by the SVM model are very reliable in themselves.
 As for our NN models, although there also exists a performance drop, they performs much better than the SVM model. This shows that the word usage gap can be resolved by using word embeddings to a some extent. Furthermore, we can see that the model using relevant articles (\texttt{\_article}) clearly outperform \texttt{NN}, \orange{showing that relevant articles provide valuable information in this situation.}
 
-Also note that, since the news test set is relatively small regarding the number of charges, the macro statistics are not as meaningful as those in the judgement document test set. For example, correctly predicting a charge with only one instance will improve the macro precision and recall by 4\% (${1}\div{25}$). Therefore, \texttt{NN\_article} outperforms \texttt{NN\_guide\_article} in macro F1 by 4.38\% does not necessarily mean that it performs better on infrequent charges. 
+Also note that, since the news test set is relatively small regarding the number of charges, the macro statistics are not as meaningful as those in the judgement document test set. For example, correctly predicting a charge with only one instance will improve the macro precision and recall by 4\% (${1}\div{25}$). Therefore, \texttt{NN\_article} outperforms \texttt{NN\_supv\_article} in macro F1 by 4.38\% does not necessarily mean that it performs better on infrequent charges. 
 Actually, %except for other differences, 
-\texttt{NN\_article} only generates one more such case than \texttt{NN\_guide\_article}, while \texttt{NN\_guide\_article} correctly predicts 4 more cases than \texttt{NN\_article} in total. Therefore, we still consider \texttt{NN\_guide\_article} to be better than \texttt{NN\_article} on news data.
+\texttt{NN\_article} only generates one more such case than \texttt{NN\_supv\_article}, while \texttt{NN\_supv\_article} correctly predicts 4 more cases than \texttt{NN\_article} in total. Therefore, we still consider \texttt{NN\_supv\_article} to be better than \texttt{NN\_article} on news data.
 
 
-% Also note that compared with \texttt{NN\_article}, \texttt{NN\_guide\_article} has better micro statistics but worse macro statistics, indicating that the additional guidance over article attention makes the model perform better on frequent charges but worse on infrequent ones on news data. 
-% The reason is that, since the top $k$ article extractor also utilizes BOW features, its performances drops significantly on news data, leading to some situations where the key article is not included in the top $k$ results. While the attention of \texttt{NN\_article} will be diffusive in these situations, due to the article attention guidance, \texttt{NN\_guide\_article} has a stronger tendency to put the attention on the articles related to frequent or other relevant charges, and thus is more likely to generate false prediction.  
+% Also note that compared with \texttt{NN\_article}, \texttt{NN\_supv\_article} has better micro statistics but worse macro statistics, indicating that the additional supervision over article attention makes the model perform better on frequent charges but worse on infrequent ones on news data. 
+% The reason is that, since the top $k$ article extractor also utilizes BOW features, its performances drops significantly on news data, leading to some situations where the key article is not included in the top $k$ results. While the attention of \texttt{NN\_article} will be diffusive in these situations, due to the article attention supervision, \texttt{NN\_supv\_article} has a stronger tendency to put the attention on the articles related to frequent or other relevant charges, and thus is more likely to generate false prediction.  
 % \todo{re-organize this part}
 

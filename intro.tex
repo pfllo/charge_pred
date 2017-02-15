@@ -11,7 +11,7 @@ distinguishing \emph{intentional homicide} from \emph{intentional injury} would 
 % distinguishing \emph{intentional homicide} from \emph{negligent homicide} would require detailed analysis of the behavior of the defendant.
 % and \emph{acceptance of bribes} differs from \emph{acceptance of bribes by a non-state functionary} in the occupation of the defendant. 
 (2) Multiple crimes may be involved in a single case, which means we need to conduct charge prediction in the multi-label classification paradigm. 
-(3)  Although we can expect the model to implicitly learn the legal basis of the judgement through massive training data, the predicted charges are still not convincing enough if no law articles are involved in the prediction. This problem is prominent in countries using civil law system, e.g., China (except Hong Kong), where the judgement is made only based on statutory laws. 
+(3) Although we can expect the model to implicitly learn the legal basis of the judgement through massive training data, the predicted charges are still not convincing enough if no law articles are involved in the prediction. This problem is prominent in countries using civil law system, e.g., China (except Hong Kong), where the judgement is made only based on statutory laws. 
 For example, as shown in Figure \ref{fig_example_case}, a judgement document in China always includes relevant law articles (usually in the court view part) to support the decision.  
 Even in countries using common law system, e.g., the United States (except Louisiana), where the judgement is based mainly on decisions of previous cases, there are still some statutory laws that need to be followed when making decisions. 
 
@@ -36,14 +36,17 @@ To find relevant law articles in the statutory laws, which contain a large numbe
 
 We evaluate our method by predicting charges in Chinese criminal cases. 
 Since the public judgement documents often contain the fact descriptions, relevant law articles and corresponding charges (see Figure \ref{fig_example_case}), they actually provide natural large-scale high-quality trianing data for our task. 
-We therefore use rules and regular expressions to extract these information and build a dataset accordingly. The experimental results on this dataset show that our method significantly outperforms the baselie BOW-based Suport Vecotr Machine (SVM) method, and the automatically extracted relevant law articles can clearly improve the model with only facts as input. We also find that our model can effectively attend to the true relevant articles, which to some extent provides us with the legal basis for our charge prediction. Furthermore, since there exists differences between the words used by laymen and legal practitioners, we also annotate 100 news to test the performance of our model on fact descriptions wrtitten by odinary people, which is more useful in practice. The experimental results show that, although trained on judgement document data, our model still has reasonable generalizatoin ability in this situation.
+We therefore use rules and regular expressions to extract these information and build a dataset accordingly. 
+The experimental results on this dataset show that our method significantly outperforms the baselie BOW-based Suport Vecotr Machine (SVM) method, and the automatically extracted relevant law articles can clearly improve the model with only facts as input. 
+We also find that our model can effectively attend to the true relevant articles, which to some extent provides us with the legal basis for our charge prediction. 
+Furthermore, since there exist differences between the words used by laymen and legal practitioners, we also annotate 100 news to test the performance of our model on fact descriptions wrtitten by odinary people, which is more useful in practice. The experimental results show that, although trained on judgement document data, our model still has reasonable generalizatoin ability in this situation, which siginicantly outperforms the baseline SVM model as well.
 
 % In this paper, we focus specifically on predicting the charges of criminal cases in China, \orange{which began to} officially publish the judgement documents on China Judgements Online\footnote{http://wenshu.court.gov.cn/} since 2013. Although these judgement documents are unstructured, we can use rules and regular expressions to extract the facts description, relevant law articles, and final charges of the case. This naturally provides us with a high-quality large-scale training dataset for our task.
 
 The contributions of this paper are threefold: 
 (1) It proposes a novel neural network model that can jointly utilize the facts and the automatically extracted relevant law articles of a case to predict appropriate charges.
 (2) The proposed model can aslo provide legal basis for the charge prediction in the form of weighted relevant law articles.
-(2) By further evaluating the model on human labeled news data, it shows that the model trained on judgement documents have reasonable generalization ability on the text written by people who are not legal practitioners.
+(2) By further evaluating the model on human labeled news data, it shows that, although trained on judgement documents, the proposed model also has reasonable generalization ability on the text written by people who are not legal practitioners.
 
 
 \begin{figure*}[t!]
