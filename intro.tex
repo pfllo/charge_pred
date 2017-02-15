@@ -26,7 +26,7 @@ Previous works on charge prediction either use k-Nearest Neighbor (KNN)~\cite{LI
 % \footnote{\cite{katz2016general} also use an additional \emph{other} class to represent other complex outcomes.}
 
 % To make conprehensive understanding of the fact description, \orange{we propose to use the framework of the Hierarchical Attention Network (HAN)} \cite{yang2016hierarchical} for document embedding. Specifically, we use a sentence-level and a document-level Gated Recurrent Unit (GRU) to embed each word and each sentence along with their contexts. 
-In our proposed method, however, we jointly model the charge prediction and relevant article extraction in a sinble framework, which enables them to influence each other \orange{in a positive way}.
+In our proposed method, however, we jointly model the charge prediction and relevant article extraction in a single framework, which enables them to influence each other \orange{in a positive way}.
 Specifically, to understand the \orange{whole framework} of the facts, inspired by previous works on document classification \cite{tang2015document,yang2016hierarchical}, we use a sentence-level and a document-level Gated Recurrent Unit (GRU) to model the associations among words and sentences.
 To capture the important details, we use attention mechanism to select the most informative words or sentences for sentence and document embedding respectively. 
 To handle the multi-label nature of the problem, we convert the multi-label target to label distribution, and then use cross entropy as loss function. 
@@ -34,25 +34,28 @@ To handle the multi-label nature of the problem, we convert the multi-label targ
 To find relevant law articles in the statutory laws, which contain a large number of articles, to support our charge prediction, we first use a simple BOW-based article classifier to quickly \orange{filter out most of the irrelevant articles}. Then we attentively aggregate the retained top $k$ articles for further charge classification.
 % Although the top $k$ articles are noisy, the experimental results show that our attentive aggregation module can further attend to relevant ones and thus improve the prediction performance. 
 
-We evaluate our method by predicting charges in Chinese criminal cases. 
-Since the public judgement documents often contain the fact descriptions, relevant law articles and corresponding charges (see Figure \ref{fig_example_case}), they actually provide natural large-scale high-quality trianing data for our task. 
-We therefore use rules and regular expressions to extract these information and build a dataset accordingly. 
-The experimental results on this dataset show that our method significantly outperforms the baselie BOW-based Suport Vecotr Machine (SVM) method, and the automatically extracted relevant law articles can clearly improve the model with only facts as input. 
-We also find that our model can effectively attend to the true relevant articles, which to some extent provides us with the legal basis for our charge prediction. 
-Furthermore, since there exist differences between the words used by laymen and legal practitioners, we also annotate 100 news to test the performance of our model on fact descriptions wrtitten by odinary people, which is more useful in practice. The experimental results show that, although trained on judgement document data, our model still has reasonable generalizatoin ability in this situation, which siginicantly outperforms the baseline SVM model as well.
+We evaluate our method by predicting charges of Chinese criminal cases. 
+Since the public judgement documents often contain fact descriptions, relevant law articles and corresponding charges (see Figure \ref{fig_example_case}), we use rules and regular expressions to extract these information and build a dataset accordingly. 
+The experimental results on this dataset show that our method can effectively predict appropriate charges for a given case, and provide relevant law articles as legal basis for the prediction as well. We also find that, apart from providing legal basis, relevant articles also contain valuable information that can help the charge prediction.
+Furthermore, since there exist differences between the words used by laymen and legal practitioners, we also annotate 100 news to test the performance of our model on fact descriptions wrtitten by odinary people, which is more useful in practice. The experimental results show that, although trained on judgement document data, our model still has reasonable generalizatoin ability in this situation.
+
+% our method significantly outperforms the baselie BOW-based Suport Vecotr Machine (SVM) method, and the automatically extracted relevant law articles can clearly improve the model with only facts as input. 
+% We also find that our model can effectively attend to the true relevant articles, which to some extent provides us with the legal basis for our charge prediction. 
 
 % In this paper, we focus specifically on predicting the charges of criminal cases in China, \orange{which began to} officially publish the judgement documents on China Judgements Online\footnote{http://wenshu.court.gov.cn/} since 2013. Although these judgement documents are unstructured, we can use rules and regular expressions to extract the facts description, relevant law articles, and final charges of the case. This naturally provides us with a high-quality large-scale training dataset for our task.
 
 The contributions of this paper are threefold: 
 (1) It proposes a novel neural network model that can jointly utilize the facts and the automatically extracted relevant law articles of a case to predict appropriate charges.
-(2) The proposed model can aslo provide legal basis for the charge prediction in the form of weighted relevant law articles.
-(2) By further evaluating the model on human labeled news data, it shows that, although trained on judgement documents, the proposed model also has reasonable generalization ability on the text written by people who are not legal practitioners.
+(2) The proposed model can also provide legal basis for the charge prediction in the form of weighted relevant law articles.
+(3) By further evaluating the model on human labeled news data, it shows that, although trained on judgement documents, the proposed model also has reasonable generalization ability on the text written by people who are not legal practitioners.
 
 
 \begin{figure*}[t!]
 \begin{center}
 \includegraphics[width=0.97\textwidth]{figures/case.png}	
-\caption{Example judgement document excerpt of a Chinese criminal case. Names are anonymized as AA and BB.}
+\caption{Example judgement document excerpt of a Chinese criminal case. Names are anonymized as AA and BB.
+Circle 1, 2 and 3 refers to the clauses that usually indicates the start of the facts part, the court view part and the sentence part respectively.
+}
 \label{fig_example_case}
 \end{center}
 \end{figure*}
