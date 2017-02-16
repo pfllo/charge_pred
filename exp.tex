@@ -1,5 +1,5 @@
 \section{Experiments}
-\subsection{Implementation Details}
+\subsection{Experimental Setup}
 We use HanLP\footnote{\url{https://github.com/hankcs/HanLP}} for Chinese word segmentation and POS tagging. 
 As for word embeddings, we use Baidu Encyclopedia, 3 million judgement documents and 3 million legal question answer pairs crawled from multiple legal forums as corpus, and the word2vec~\cite{mikolov2013distributed} for training. 
 The size of the resultant word embedding is 100-d and there are 573,353 words in total. 
@@ -13,13 +13,15 @@ We use Stochastic Gradient Descent (SGD) for training, with learning rate 0.1, a
 The chi-square feature selector keeps the top 2,000 features.
 % , and we use the SVM model implemented in scikit-learn \cite{scikit-learn} in our experiments.
 
+We compare our full model with two variations: without article attention supervision and with only facts as input. We also implement a SVM model, which proves to be effective in \orange{many text classification tasks}~\cite{wang2012baselines,aletras2016predicting}. Specifically, the SVM model takes bag-of-words TF-IDF features as input, and uses chi-square to select top 2000 features.
+
 
 \begin{table}
 \centering
 \small{
 \begin{tabular}{|c|c|c|c|}
 \hline
-\textbf{Model}				& \textbf{Precision} 	& \textbf{Recall} 		& \textbf{F1} 	\\
+\textbf{Model}				& \tabincell{c}{\textbf{Precision}} 	& \tabincell{c}{\textbf{Recall}} 		& \tabincell{c}{\textbf{F1}} 	\\
 \hline
 \textit{SVM} 				& \textbf{93.94}/79.53					& 77.66/49.54  					& 85.03/61.05 				 	\\
 \hline
@@ -45,14 +47,16 @@ The chi-square feature selector keeps the top 2,000 features.
 \hline
 \end{tabular}
 }
-\caption{Charge Prediction Results. $^*$ refers to gold standard articles, which are not available in \orange{production environment}.}
+\caption{Charge Prediction Results. $^*$ refers to using gold standard (rather than extracted) articles during training and testing. Left side and right side of the slash refer to micro and macro statistics respectively.}
 \label{tabble_main_results}
 \end{table}
 
 
 \subsection{Charge Prediction Results}
 \label{sec_main_results}
-We compare our method with a baseline BOW-based SVM method, which is similar to the one used for the top $k$ article extractor, except that the outputs are charges rather than articles. The results are summarized in Table \ref{tabble_main_results}. The left side of the slash refers to micro statistics, and the right side refers to macro statistics. Specifically, micro precision (or recall) is the the number of correct predictions divided by the total number of predictions (or the total number of gold standard charges), while the macro precision (or recall) is the sum of the precision (or recall) of each charge divided by the number of distinct charges in test set. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
+The results are summarized in Table \ref{tabble_main_results}. 
+% The left side of the slash refers to micro statistics, and the right side refers to macro statistics. 
+Micro precision (or recall) is the the number of correct predictions divided by the total number of predictions (or the total number of gold standard charges), while the macro precision (or recall) is the sum of the precision (or recall) of each charge divided by the number of distinct charges in test set. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
 
 
 %The $Acc.$ refers to instance accuracy, which is the number of instances whose classes are all correctly predicted divided by the total number of instances.
@@ -89,24 +93,24 @@ As for \texttt{NN\_supv\_article}, it allows interactions between facts and law 
 
 \subsection{Article Related Results}
 \paragraph{Top $k$ Article Extraction}
-\begin{table}
-\centering
-\normalsize{
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-				& \textbf{Top\_5} 	& \textbf{Top\_10} 		& \textbf{Top\_20} 	& \textbf{Top\_30} \\
-\hline
-\textit{Recall} 		& 77.60			& 88.96  				& 94.21			& 96.53 	\\
-\hline
-\textit{NDCG} 		& 80.28			& 84.32  				& 86.47			& 87.24 	\\
-\hline
-\end{tabular}
-}
-\caption{Top $k$ Article Extraction Performance}
-\label{tab_article_extraction}
-\end{table}
-
-The performance of our top $k$ article extractor is show in Table \ref{tab_article_extraction}.
+% \begin{table}
+% \centering
+% \normalsize{
+% \begin{tabular}{|c|c|c|c|c|}
+% \hline
+% 				& \textbf{Top\_5} 	& \textbf{Top\_10} 		& \textbf{Top\_20} 	& \textbf{Top\_30} \\
+% \hline
+% \textit{Recall} 		& 77.60			& 88.96  				& 94.21			& 96.53 	\\
+% \hline
+% \textit{NDCG} 		& 80.28			& 84.32  				& 86.47			& 87.24 	\\
+% \hline
+% \end{tabular}
+% }
+% \caption{Top $k$ Article Extraction Performance}
+% \label{tab_article_extraction}
+% \end{table}
+Our top $k$ article extractor achieves 77.60\%, 88.96\%, 94.21\% and 96.53\% recall for the top 5, 10, 20 and 30 results respectively.
+% The performance of our top $k$ article extractor is show in Table \ref{tab_article_extraction}.
 We can see that, although simple, our SVM article extractor already achieves promising performance, and the recall of the top 20 results has achieved 94.21\%, which is good enough to support charge prediction. 
 On the other hand, however, we still cannot trust its prediction results directly.  In our test set, the micro F1 of the model is only 61.08\%, which will lead to severe error propagation problem if we use the precition directly. Therefore, we instead retain the top 20 articles, and use the powerful NN model to resolve the noise in the top 20 results.
 
