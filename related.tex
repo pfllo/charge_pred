@@ -2,7 +2,7 @@
 \label{sec_related_work}
 The charge prediction task aims at predicting appropriate charges based on the facts of a case.
 \cite{LIU2004case,liu2006exploring} use KNN to classify charges of criminal cases in Taiwan. However, except for the inferior scalability of the KNN method, their word-level or phrase-level features also do not provide enough information to distinguish very similar charges. 
-\cite{lin2012exploiting} proposes to make deeper understanding of a case by identifying charge-specific factors manually designed for two charges. Their method also suffers from sclability issue due to the human efforts requied to design and annotate these  factors. Our method, however, employs GRU and attention mechnism to make comphrehensive understanding of a case, and all the training data are automatically constructed based on public judgement documents. 
+\cite{lin2012exploiting} proposes to make deeper understanding of a case by identifying charge-specific factors manually designed for two charges. Their method also suffers from scalability issue due to the human efforts requied to design and annotate these factors. Our method, however, employs GRU and attention mechnism to make comphrehensive understanding of a case, and all the training data are automatically constructed based on public judgement documents. 
 
 On the other hand,
 \cite{liu2005classifying,liu2006exploring} also try to find the specific law articles that has been violated. However, they convert the multi-label problem to multi-class classification problem by only considering a fixed set of article combinations, which cannot scale well since the number of possible combinations will grow expentially when a larger set of law articles are considered.

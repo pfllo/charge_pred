@@ -11,16 +11,16 @@
 % In order to generate reasonable charge prediction, 
 Our approach follows four steps as depicted in Figure \ref{fig_model_framework}. 
 (1) The input fact description is fed to a document encoder to generate the fact embedding $\mathbf{d_f}$.
-(2) Concurrently, the input fact description is also passed to a relevant article extractor to find top $k$ relevant law articles. 
-(3) The article are fed to another document encoder, and the article embeddings are further passed to an article aggregator to produce the aggregated article embedding $\mathbf{d_a}$. Meanwhile, three context vectors, i.e., $\mathbf{u_{aw}}$, $\mathbf{u_{as}}$ and $\mathbf{u_{ad}}$, are dynamically generated from $\mathbf{d_f}$ for the article document encoder and the article aggregator. 
-(4) Finally, $\mathbf{d_f}$ and $\mathbf{d_a}$ are concatenated and passed to a softmax classifier to predict the charge distribution of the input case.
+(2) Concurrently, the fact description is also passed to an article extractor to find top $k$ relevant law articles. 
+(3) The extracted articles are fed to another document encoder, and the resultant article embeddings are passed to an article aggregator to produce the aggregated article embedding $\mathbf{d_a}$. Meanwhile, three context vectors, i.e., $\mathbf{u_{aw}}$, $\mathbf{u_{as}}$ and $\mathbf{u_{ad}}$, are dynamically generated from $\mathbf{d_f}$ for the article document encoder and the article aggregator. 
+(4) Finally, $\mathbf{d_f}$ and $\mathbf{d_a}$ are concatenated and passed to a softmax classifier to predict the charge distribution for the input case.
 
 %The fact-based charge classification task can be formatted as a multi-label document classification task. The input is several sentences describing the facts of a case, and the output is multiple charges related to the case. Since usually multiple elements are required to constitute a charge (for example, the charge of acceptance of bribes requires the defendant to illegally accepts another person's money, and the defendant should also be a state functionary), the recurrent neural network (RNN) seems like a natural fit for the task. Considering the fact that only a small portion of the facts are crucial for the determination of charges, we also use attention mechanism in our model. Since the HAN model  satisfies many of our requirements except the multi-label classification capability, we use the framework of the HAN model for document embedding, but replace the output module and the loss function with ones that are compatible with the multi-label classification task. Furthermore, to take the information of article into account, we add another article attention module to incorporate the information of relevant articles to the model.
 
 \subsection{Document Encoder}
 \label{sec_doc_encoder}
 % Our document encoder module is based on the framework of Hierarchical Neural Network (HAN) proposed by \cite{yang2016hierarchical}. The overview of our document encoder is shown in Figure \ref{fig_doc_encoder}. 
-Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. As suggested by previous works \cite{tang2015document,yang2016hierarchical}, the document embedding problem can be converted to two sequence embedding problems. As shown in Figure \ref{fig_doc_encoder}, we can first embedding each sentence using the sentence-level sequence encoder, and then aggregate them with document-level sequence encoder to generate the document embedding $\mathbf{d}$. 
+Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. As suggested by \cite{tang2015document,yang2016hierarchical}, the document embedding problem can be converted to two sequence embedding problems. As shown in Figure \ref{fig_doc_encoder}, we can first embed each sentence using a sentence-level sequence encoder, and then aggregate them with a document-level sequence encoder to generate the document embedding $\mathbf{d}$. 
 % Therefore, the key problem of document embedding converts to building an effective sequence encoder.
 Although it is possible to use different models for these two sequence encoders, we simply use the same architecture here for simplicity.
 
@@ -43,7 +43,7 @@ Although it is possible to use different models for these two sequence encoders,
 
 \paragraph{Bi-GRU Sequence Encoder} 
 A prominent challenge in building a sequence encoder is how to take the correlation of each elements into consideration. A promising solution is the bi-directional gated recurrent unit (Bi-GRU) model proposed by \cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
-Specifically, Bi-GRU first uses a forward and a backward GRU~\cite{cho2014learning}, which a kind of Recurrent Neural Network (RNN), to encode the sequence in two opposite directions, and then concatenate the results of both GRUs to form the final outputs. 
+Specifically, Bi-GRU first uses a forward and a backward GRU~\cite{cho2014learning}, which is a kind of Recurrent Neural Network (RNN), to encode the sequence in two opposite directions, and then concatenate the results of both GRUs to form the final outputs. 
 
 Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathbf{x}_t$ is the input embedding of element $t$, the state of Bi-GRU at position $t$ is:
 
@@ -51,7 +51,7 @@ Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathb
 %h_t = [\overrightarrow{h}_t , \overleftarrow{h}_t]
 \mathbf{h}_t = [\mathbf{h}_{ft}, \mathbf{h}_{bt}]
 \end{equation}
-where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the state the forward and backward GRU at position $t$ respectively. The final sequence embedding is either the concatenation of $\mathbf{h}_{fT}$ and $\mathbf{h}_{b1}$, or simply the average of the average of $\mathbf{h}_t$.
+where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the states of the forward and backward GRU at position $t$ respectively. The final sequence embedding is either the concatenation of $\mathbf{h}_{fT}$ and $\mathbf{h}_{b1}$, or simply the average of $\mathbf{h}_t$.
 
 % And the state of a single GRU (take forward GRU as an example) is calculated by:
 % \begin{equation}
@@ -139,7 +139,7 @@ Therefore, we use the attentive sequence encoder in Section \ref{sec_att_seq_enc
 
 
 \subsection{Output and Loss Function}
-To generate the charge prediction, we first concatenate the document embedding $\mathbf{d}_f$ and the aggregated article embedding $\mathbf{d}_a$, and feed them to two consecutive full connection layers to generate a new vector $\mathbf{d}$. Then, $\mathbf{d}$ is passed to a softmax classifier to generate the predicted charge distribution. We use the validation set to determine a threshold $\tau$, and consider all the charges with a output probability higher than $\tau$ as positive predictions.
+To generate the charge prediction, we first concatenate the document embedding $\mathbf{d}_f$ and the aggregated article embedding $\mathbf{d}_a$, and feed them to two consecutive full connection layers to generate a new vector $\mathbf{d}'$. Then, $\mathbf{d}'$ is passed to a softmax classifier to generate the predicted charge distribution. We use the validation set to determine a threshold $\tau$, and consider all the charges with output probability higher than $\tau$ as positive predictions.
 % Note that although other multi-label classification paradigms are also applicable to our problem (see Section \ref{sec_related_work}), we use this method because it performs best in our pilot experiments. 
 Also note that the input to the first full connection layer can also be $\mathbf{d}_f$ only, which means we do not use the information from relevant law articles.
 % (see comparison in Section \ref{sec_main_results}). 
@@ -152,7 +152,7 @@ Loss= -\sum_{i=1}^N\sum_{l=1}^L{y_{il} log(o_{il})}
 where $N$ is the number of training data, $L$ is the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ of datum $i$. Here the target charge distribution $\mathbf{y}$ is generated by setting positive labels to $\frac{1}{m}$ and negative labels to $0$, where $m$ is the number of positive labels.
 
 \paragraph{Supervised Article Attention}
-Since the judgement documents also contain gold standard relevant law articles, we can further use this information to \orange{supervise} the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold standard articles in the top $k$ extractions.
+Since the judgement documents also contain gold standard relevant law articles, we can therefore use this information to \orange{supervise} the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold standard articles in the top $k$ extractions.
 
 % : \todo{can be simplified}
 % \begin{equation}

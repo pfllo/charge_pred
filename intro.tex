@@ -6,7 +6,7 @@ For example, if the user wants to find similar cases, one can use the predicted 
 
 In these situations, we need to predict appropirate charges based solely on the fact descriptions of a case. 
 However, this charge prediction task is not easy:
-(1) The differences between two charges can sometimes be subtle. For example, in the context of criminal cases in China, 
+(1) The differences between two charges can sometimes be subtle, for example, in the context of criminal cases in China, 
 distinguishing \emph{intentional homicide} from \emph{intentional injury} would require determining whether the defendant is intended to kill the victim in the cases where the victim is dead.
 % distinguishing \emph{intentional homicide} from \emph{negligent homicide} would require detailed analysis of the behavior of the defendant.
 % and \emph{acceptance of bribes} differs from \emph{acceptance of bribes by a non-state functionary} in the occupation of the defendant. 
@@ -17,7 +17,7 @@ Even in countries using common law system, e.g., the United States (except Louis
 
 % Therefore, to solve this problem, we need a multi-label classification model, that can effectively capture the overall \orange{framework} along with important details of the fact description, and is able to extract and utilize relevant law articles to build the bridge from the fact description to appropriate charges as well. 
 
-Previous works on charge prediction either use k-Nearest Neighbor (KNN)~\cite{LIU2004case,liu2006exploring} as classifier or need to manually design key factors of specific charges \cite{lin2012exploiting}, thus do not scale well with regard to data size and number of charges. Furthermore, none of them consider the situation where multiple charges are involved. On the other hand, \cite{liu2005classifying,liu2006exploring} also try to find the specific law articles that has been violated, but converts the multi-label problem into multi-class classification by only considering a fixed set of article combinations, therefore does not scale to the situation when a larger set of articles are involved. \cite{liu2015predicting} aims to find relevant articles in a scalable way by doing predilinary classification first and rerank the results afterwards. Although the framework is promising, only shallow, i.e., word-level, semantic features are employed in their work. Furthermore, all of these works treat charge prediction and article prediction separately, ignoring the fact that they can actually benefit each other. 
+Previous works on charge prediction either use k-Nearest Neighbor (KNN)~\cite{LIU2004case,liu2006exploring} as classifier or need to manually design key factors of specific charges \cite{lin2012exploiting}, thus do not scale well with regard to data size and number of charges. Furthermore, none of them consider the situation where multiple charges are involved. On the other hand, \cite{liu2005classifying,liu2006exploring} also try to find the specific law articles that has been violated, but converts the multi-label problem into multi-class classification by only considering a fixed set of article combinations, therefore does not scale to the situation when a larger set of articles are involved. \cite{liu2015predicting} aims to find relevant articles in a scalable way by doing preliminary classification first and rerank the results afterwards. Although the framework is promising, only shallow, i.e., word-level, semantic features are employed in their work. Furthermore, all of these works treat charge prediction and article prediction separately, ignoring the fact that they can actually benefit each other. 
 
 
 % Since the judgement of a case often involves deciding appropriate charges, our work is part of the thread of work that tries to predicting the results of a case. Previous works on this thread mainly focuses on a binary classification paradigm. The target is either to decide whether the outcome will side with the plaintiff or defendant~\cite{aletras2016predicting}, or will the justice or the present court affirm or reverse the decision of a lower court~\cite{lauderdale2014scaling,sim2015utility,katz2016general}. Except for their binary prediction nature, these methods either do not use fact descriptions or just capture shallow semantic meaning of the facts, e.g., using Bag-of-Words (BOW). Furthermore, although \cite{aletras2016predicting} also tries to use relevant law articles for prediction, the articles they use are gold standard ones while we extract the relevant article by ourselves.
@@ -26,7 +26,7 @@ Previous works on charge prediction either use k-Nearest Neighbor (KNN)~\cite{LI
 % \footnote{\cite{katz2016general} also use an additional \emph{other} class to represent other complex outcomes.}
 
 % To make conprehensive understanding of the fact description, \orange{we propose to use the framework of the Hierarchical Attention Network (HAN)} \cite{yang2016hierarchical} for document embedding. Specifically, we use a sentence-level and a document-level Gated Recurrent Unit (GRU) to embed each word and each sentence along with their contexts. 
-In our proposed method, however, we jointly model the charge prediction and relevant article extraction in a single framework, which enables them to influence each other \orange{in a positive way}.
+In our proposed method, however, we jointly model charge prediction and relevant article extraction in a single framework, which enables them to influence each other \orange{in a positive way}.
 Specifically, to understand the \orange{whole framework} of the facts, inspired by previous works on document classification \cite{tang2015document,yang2016hierarchical}, we use a sentence-level and a document-level Gated Recurrent Unit (GRU) to model the associations among words and sentences.
 To capture the important details, we use attention mechanism to select the most informative words or sentences for sentence and document embedding respectively. 
 To handle the multi-label nature of the problem, we convert the multi-label target to label distribution, and then use cross entropy as loss function. 
@@ -54,7 +54,7 @@ The contributions of this paper are threefold:
 \begin{center}
 \includegraphics[width=0.97\textwidth]{figures/case.png}	
 \caption{Example judgement document excerpt of a Chinese criminal case. Names are anonymized as AA and BB.
-Circle 1, 2 and 3 refers to the clauses that usually indicates the start of the facts part, the court view part and the sentence part respectively.
+Rectangulars, ellipses and dashed rectangulars refers to the clauses that usually indicates the start of the facts part, the court view part and the sentence part respectively.
 }
 \label{fig_example_case}
 \end{center}
