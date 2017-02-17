@@ -41,27 +41,31 @@ We compare our full model with two variations: without article attention supervi
 \textbf{\textit{NN\_gold\_article$^*$}} 		& 98.78/\textbf{95.26} 			& \textbf{98.24/95.57} 			& \textbf{98.51/95.42} 			\\
 \hline
 \hline
-\textit{NN\_article\_only} 			& 87.38/78.61				& 82.69/64.32				& 84.97/70.75		\\
+\textit{NN\_article\_only} 			& 90.09/81.50				& 86.10/69.62				& 88.05/75.10		\\
 \hline
 \textit{NN\_gold\_only$^*$} 		& 97.22/92.39				& 98.36/94.73				& 97.79/93.55		\\
 \hline
 \end{tabular}
 }
-\caption{Charge Prediction Results. $^*$ refers to using gold standard (rather than extracted) articles during training and testing. Left side and right side of the slash refer to micro and macro statistics respectively.}
+\caption{Charge prediction results. $^*$ refers to using gold standard (rather than extracted) articles during training and testing. Left side and right side of the slash refer to micro and macro statistics respectively.}
 \label{tabble_main_results}
 \end{table}
+
+
+% \textit{NN\_article\_only} 			& 87.38/78.61				& 82.69/64.32				& 84.97/70.75		\\
 
 
 \subsection{Charge Prediction Results}
 \label{sec_main_results}
 The charge prediction results are summarized in Table \ref{tabble_main_results}. 
 % The left side of the slash refers to micro statistics, and the right side refers to macro statistics. 
-Micro precision (or recall) is the the number of correct predictions divided by the total number of predictions (or the total number of gold standard charges), while the macro precision (or recall) is the sum of the precision (or recall) of each charge divided by the number of distinct charges. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
+% Micro precision (or recall) is the the number of correct predictions divided by the total number of predictions (or the total number of gold standard charges), while the macro precision (or recall) is the sum of the precision (or recall) of each charge divided by the number of distinct charges. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
+Macro precision (or recall) is calculated by averaging the precision (or recall) of each charge, and the micro precision (or recall) is caculated on all the data directly. In other words, macro statistics give equal weight to each charge, while micro statistics give equal weight to each individual prediction. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
 
 
 %The $Acc.$ refers to instance accuracy, which is the number of instances whose classes are all correctly predicted divided by the total number of instances.
 
-We can see that, the basic \texttt{SVM} model, which only uses facts as input, proves to be a strong baseline. If we use both the facts and the gold standard articles of each case (\texttt{SVM\_gold\_article}), the performance can be further improved significantly, showing that the relevant law articles contain valuable information for charge prediction. However, the results become worse when we replace the gold standard articles with the extracted ones (\texttt{SVM\_article}), indicating that the SVM model cannot benefit from the additional information of relevant articles when they are noisy. 
+We can see that, the basic \texttt{SVM} model, which only takes facts as input, proves to be a strong baseline. If we use both the facts and the gold standard articles of each case (\texttt{SVM\_gold\_article}), the performance can be further improved significantly, showing that the relevant law articles contain valuable information for charge prediction. However, the results become worse when we replace the gold standard articles with the extracted ones (\texttt{SVM\_article}), indicating that the SVM model cannot benefit from the additional information of relevant articles when they are noisy. 
 % If we only use the gold standard articles of each case for classification (\texttt{SVM\_only\_gold}), the micro F1 can be further improved to 98.35, which further indicates that the SVM model has bad resistence to noise. \todo{is \texttt{\_only\_gold} necessary?}
 
 On the other hand, since our attentive article aggregator has the ability to distinguish relevant articles from extraction mistakes, our neural network (NN) model (\texttt{NN\_article}) can make use of the noisy article extractions, and improve the performance over the model using only facts as input (\texttt{NN}), which has already ourperfroms \texttt{SVM} by a large margin.
@@ -75,10 +79,18 @@ Also note that, compared with the corresponding SVM models, the improvements mad
 
 % As for our neural network (NN) model (\texttt{NN}), since it can better understand the associations among sentences and words, and can select the most informative parts of the text, they significantly outperforms the corresponding SVM models. 
 
-We also evaluate our NN model with only articles as input. Specifically, the relevant articles are concatenated and passed to the model by replacing the fact descriptions. We find that using only the top 20 extracted articles (\texttt{NN\_article\_only}) still generates \orange{fair} results, and the model performs very good when the extracted articles are replaced with gold standard ones (\texttt{NN\_gold\_only}), which significantly outperforms \texttt{NN}. 
+We also evaluate two variations which only use articles for charge prediction.
+\texttt{NN\_gold\_only} uses concatenated gold standard articles, instead of facts, as input. 
+\texttt{NN\_article\_only} uses extracted articles, and it still uses fact embedding and article aggregator to handle the noise in the top 20 articles, but only the aggregated article embedding $\mathbf{d}_a$ is used for charge prediction.
+We can see that the performance of \texttt{NN\_gold\_only} is very good and \texttt{NN\_article\_only} also generates reasonable results. 
 This actually indicates the nature of the civil law system that judgements are made based on statutory laws rather than decisions of previous cases.
-However, we can see that the performance of \texttt{NN} is also promising, showing that although the judgments are based on statutory laws, our model can still learn the \orange{legal logic} behind this implicitly through only the (facts, charges) paris. 
 Also note that \texttt{NN\_gold\_only} is not as good as \texttt{NN\_gold\_article}, showing that the facts can provide additional information for charge prediction even if we use gold standard law articles.
+On the other hand, the performance of \texttt{NN} is also promising and outperforms \texttt{NN\_article\_only}, showing that although the judgments are based on statutory laws, we can still learn the \orange{legal logic} behind this implicitly through only the (facts, charges) paris. 
+
+% Specifically, the relevant articles are concatenated and passed to the model by replacing the fact descriptions. We find that using only the top 20 extracted articles (\texttt{NN\_article\_only}) still generates \orange{fair} results, and the model performs very good when the extracted articles are replaced with gold standard ones (\texttt{NN\_gold\_only}), which significantly outperforms \texttt{NN}. 
+
+
+
 % \orange{And the big gap between \texttt{NN\_supv\_article} and \texttt{NN\_gold\_article} indicates that there is still much room that our article extraction and embedding part can improve.}
 
 % Recall that using only facts as input, the results of \texttt{NN} is promising, showing that although the legal system of China is mainly based on civil law system, the judgements are still consistent with the facts enough for our model to implicitly learn the legal logic behind the judgement.
@@ -129,7 +141,7 @@ On the other hand, the micro F1 of the extractor is only 61.08\% in the test set
 \hline
 % \textbf{Att\_Weight}
 % \bm{$\beta$}
-\bm{$\beta$}			& \textbf{Prec@1} 						& \textbf{MAP} 			& \textbf{Charge\_F1} \\
+\bm{$\beta$}							& \textbf{Prec@1} 		& \textbf{MAP} 			& \textbf{Charge\_F1} \\
 \hline
 \textit{0} 								& 60.94								& 61.61 						& 89.59/79.23 	\\
 \hline
@@ -176,15 +188,15 @@ However, the charge prediction performance does not always increase with the art
 
 \subsection{Performance on News Data}
 Since there are some differences between the expressions used by \orange{laymen} and legal practitioners, 
-we manually annotated 100 news\footnote{the news is randomly selected from \url{http://www.news.cn/legal/} and \url{http://legal.people.com.cn/}}, 
+we manually annotated 100 news\footnote{From \url{news.cn/legal} and \url{legal.people.com.cn}}, 
 which contains 261.79 words on average and 25 distinct charges, to see how the model trained on judgement documents performs on the fact descriptions written by ordinary people. The results are shown in Table \ref{tabble_news_results}.
 Also note that the size of the news test set is relatively small with regard to the number of charges, which results in less reliable macro statistics, we therefore only report micro statistics here.
 
-We can see that, although the SVM model has good performance on the judgement document data, it suffers from a significant performance drop on news data.
-Recall that the SVM model is based on BOW, this performance drop actually indicates an innegligible gap in expressions used by laymen and legal practitioners. 
+We can see that, although \texttt{SVM} has good performance on the judgement document data, it suffers from a significant performance drop on news data.
+Recall that \texttt{SVM} is based on BOW, this performance drop actually indicates an innegligible gap in expressions used by laymen and legal practitioners. 
 However, the high micro precision of \texttt{SVM} indicates that, although cannot generalizes well, the patterns learned by the SVM model are very reliable in themselves.
 As for our NN models, although there also exists a performance drop, they are much better than the SVM model. This shows that the  gap in expressions can be resolved by using embedding methods to a some extent. 
-For example, the word 暴打$\ $(beat up) is seldom used in judgement documents, making it hard for the SVM model to correctly classify the news containing this word. However, by using word embeddings, our NN models can understand that this word is similar to 殴打$ $(beat), and can therefore obtain useful information from it.
+For example, the word 暴打$\ $(beat up) is seldom used in judgement documents, making it hard for the SVM model to correctly classify the news containing this word. However, by using pre-trained word embeddings, our NN models can understand that this word is similar to 殴打$ $(beat), and can therefore obtain useful information from it.
 Furthermore, we can see that the model using relevant articles (\texttt{\_article}) clearly outperforms \texttt{NN}, \orange{showing that relevant articles also provide valuable information in this situation.}
 
 % Also note that, since the news test set is relatively small regarding the number of charges, the macro statistics are not as meaningful as those in the judgement document test set. For example, correctly predicting a charge with only one instance will improve the macro precision and recall by 4\% (${1}\div{25}$). Therefore, \texttt{NN\_article} outperforms \texttt{NN\_supv\_article} in macro F1 by 4.38\% does not necessarily mean that it performs better on infrequent charges. 

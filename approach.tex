@@ -169,7 +169,7 @@ We still use cross entropy here, and the loss function is:
 \label{final_loss}
 Loss = -\sum_{i=1}^N(\sum_{l=1}^L{y_{il} log(o_{il})} + \beta \sum_{j=1}^k{t_{ij} log(\alpha_{ij})})
 \end{equation}
-where $\beta$ is the weight for article attention loss.
+where $\beta$ is the weight of the article attention loss.
 
 
 % There are two commonly used methods for multi-label classification in neural network models. The first one is to consider the multi-label classification problem with $L$ labels as $L$ binary classification problem. It uses sigmoid function in the output layer and binary cross entropy as loss function. This method performs well in many multi-label text classification problems \cite{nam2014large}.
