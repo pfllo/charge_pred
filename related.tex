@@ -1,35 +1,44 @@
 \section{Related Work}
 \label{sec_related_work}
-The charge prediction task aims at predicting appropriate charges based on the facts of a case.
-\cite{LIU2004case,liu2006exploring} use KNN to classify charges of criminal cases in Taiwan. However, except for the inferior scalability of the KNN method, their word-level or phrase-level features also do not provide enough information to distinguish very similar charges. 
-\cite{lin2012exploiting} proposes to make deeper understanding of a case by identifying charge-specific factors manually designed for two charges. Their method also suffers from scalability issue due to the human efforts requied to design and annotate these factors. Our method, however, employs GRU and attention mechnism to make comphrehensive understanding of a case, and all the training data are automatically constructed based on public judgement documents. 
+The charge prediction task aims at finding appropriate charges based on the fact of a case. Previous works consider the task in a multi-class classification framework, take the textual fact description as input and output a charge label. 
+\cite{LIU2004case,liu2006exploring} use KNN to classify charges of criminal cases in Taiwan. However, except for the inferior scalability of the KNN method, their word-level and phrase-level features are too shallow to capture  sufficient evidence to distinguish similar charges with subtle differences. 
+\cite{lin2012exploiting} propose to make deeper understanding of a case by identifying charge-specific factors \red{that are manually designed for two charges}. This method also suffers from the scalability issue due to the human efforts required to design and annotate these factors for each pair of charges. Our method, however, employs GRU and a \red{stack attention mechanism} to make comprehensive understanding of a case without relying on explicit human annotations. 
+%, and all the training data are automatically constructed based on public judgement documents. 
 
-On the other hand,
-\cite{liu2005classifying,liu2006exploring} also try to find the specific law articles that has been violated. However, they convert the multi-label problem to multi-class classification problem by only considering a fixed set of article combinations, which cannot scale well since the number of possible combinations will grow expentially when a larger set of law articles are considered.
-\cite{liu2015predicting} instead designs a scalable way to find relevant law articles, 
+Within the civil law system,
+there are also works focusing on identifying applicable law articles that have been  violated in a given case. 
+%\cite{liu2005classifying,liu2006exploring} try to find the specific law articles that have been violated in a case. 
+\cite{liu2005classifying,liu2006exploring} convert this multi-label problem into a multi-class classification problem by only considering a fixed set of article combinations, which cannot scale well since the number of possible combinations will grow exponentially when a larger set of law articles are considered.
+\cite{liu2015predicting} instead design a scalable two-step approach %way to find relevant law articles, 
 by first using Support Vector Machine (SVM) for preliminary article classification, and then 
-rerank the results by using the similarity between the words in facts and articles, and the correlations among law articles as indicators.
+rerank the results using the similarity between the words in facts and articles, and \red{the correlations among law articles as indicators????}.
 % use some reranking methods to get the final relevant article list. 
-We also utilizes SVM to extract top $k$ articles, but instead use GRU and attention mechanism to better understand the texts and the correlation among articles.
+We also utilizes SVM to extract top $k$ candidate articles, but further adopt a bi-directional GRU architecture and an article-level attention mechanism to better understand the texts as well as exploring the correlation among articles. 
 % However, to better understand the association between facts and articles, we use attention mechanism to distinguish relevant ones in the top $k$ extraction results. \orange{To make our model fully differenciable,} rather than using frequent pattern mining techinque, we use RNN to model the correlations among articles.
+More importantly, \red{we optimize the article extraction task within our charge prediction framework,  which not only provides another view to understand the fact, but also serves as legal basis to support the final decision. }
 
-Another related thread of work in field of artificial intelligence and law is to predict the overall outcome of a case. The target can be predicting which party will the outcome side with~\cite{aletras2016predicting}, or will the present court affirm or reverse the decision of a lower court~\cite{katz2016general}. Our work mainly differs from them in that, instead of binary outcome (the latter one also contains an \emph{other} class), we step further to focus on the detailed results of a case, i.e., the charges, where the output may contain multiple labels. 
+Another related thread of work in the field of artificial intelligence and law is to predict the overall outcome of a case. The target can be predicting which party will the outcome side with~\cite{aletras2016predicting}, or whether the present court will affirm or reverse the decision of a lower court~\cite{katz2016general}. Our work differs from them in that, instead of binary outcome (the latter one also contains an \emph{other} class), we step further to focus on the detailed results of a case, i.e., the charges, where the output may contain multiple labels. 
 
 % Another related thread of work is to predict the overall outcome of a case. The target can be predicting whether the outcome will side with the plaintiff or defendant~\cite{bruninghaus2003predicting,aletras2016predicting}, or will the present court affirm or reverse the decision of a lower court~\cite{martin2004competing,katz2016general}. Our work mainly differs from them in that, instead of binary outcome, we step further to focuse on the detailed results of the case, i.e., the charges, where the output may contain multiple labels. 
 
 
-We share similar spirit with the legal question answering task~\cite{COLIEE14}, which aims at answering the yes/no questions in Japanese legal bar exams, that we all believe that relevant law articles are important for decisions in civil law system. 
-The task requires participants to first extract relevant Japanese Civil Code articles, and then use them to answer the questions. 
-The article extraction phase is often treated as an information retrieval task, and the question answering phase is usually considered as a textual entailment task~\cite{kim2014legal,kimconvolutional}
+We also share similar spirit with the legal question answering task~\cite{COLIEE14}, which aims at answering the yes/no questions in the Japanese legal bar exams, that we all believe that relevant law articles are important for decisions in the civil law system. 
+Different from ours, the task requires participants to first extract relevant Japanese Civil Code articles, 
+which are then used to answer the questions. 
+The former phase is often treated as an information retrieval task, and the latter phase is considered as a textual entailment task~\cite{kim2014legal,kimconvolutional}. 
 % Another thread of work also tries to answer the multiple-choice questions in the USA National Bar Exam \cite{FAWEI16,adebayoneural}. Since the United States mainly operates on common law system, where statutory laws are less important, the relevant article extraction phase is not employed in these works.
 
-Our work is also related to the task of document classification, but differs from it in that we also use automatically extracted law articles to improve and support the charge prediction.
+Our work is also related to the task of document classification, but mainly differs in that we also need to automatically identify applicable law articles to improve and support the charge prediction.
 % , a simple but effective method is to combine bag-of-words (BOW) features with varies classifiers~\cite{joachims1998text}. 
-Recently, neural network (NN) models like Convolutional Neural Network (CNN)~\cite{kim2014convolutional} have been used for document embedding, and the resultant document vecotr is further used for classification.
-\cite{tang2015document} proposes a two-layer scheme, where they use recurrent neural network (RNN) or CNN for sentence embedding, and another RNN for document embedding.
-Our method also uses this two-layer scheme, and shares similar spirit with \cite{yang2016hierarchical} in using context vectors to distinguish informative words or sentences from non-informative ones, but instead of global context vectors, we allow them to be dynamically generated for each datum when extra guidance is available.
+Recently, various neural network (NN) architectures such as convolutional neural network (CNN)~\cite{kim2014convolutional} and recurrent neural network (RNN) have been used for document embedding, which are further used for classification.
+\cite{tang2015document} proposes a two-layer scheme, RNN or CNN for sentence embedding, and another RNN for document embedding.
+%Our method also uses this two-layer scheme, and shares similar spirit with
+\cite{yang2016hierarchical} further use global context vectors \red{as attention} to distinguish informative words or sentences from non-informative ones during embedding, which we share similar spirit with. 
+But, we take a more flexible and descriptive two-stack attention mechanism, one for fact embedding, and the other one for article embedding which is  dynamically generated for each instance according to the fact-level clues as extra guidance.
 % We also differs from these works in using extracted relevant law articles to support charge classification, which require us to distinguish relevant articles from irrelevant ones, and further aggregate the information from two sources for classification.
-
-As for multi-label classification, two loss functions are commonly used in natural language processing. 
-The first one is binary cross entropy~\cite{nam2014large}, which treats the multi-label classification task as multiple binary classification tasks. 
-The second one is cross entropy~\cite{kurata2016improved}, which converts the multi-label target to label distribution during training, and use a threshold selected on validation set to generate the final prediction during testing. In our pilot experiments, we find the latter one converges faster and performs better, so the latter one is used in this paper.
+%
+Another difference is the multi-label nature of our task, where, rather than optimizing as multiple binary classification tasks, 
+we converts the multi-label target to label distribution during training with cross entropy~\cite{kurata2016improved}, and use a threshold tuned on validation set to produce the final prediction during testing, which performs better  in our pilot experiments.
+%classification, two loss functions are commonly used in natural language processing. 
+%The first one is binary cross entropy~\cite{nam2014large}, which treats the multi-label classification task as multiple binary classification tasks. 
+%The second one is cross entropy~\cite{kurata2016improved}, which converts the multi-label target to label distribution during training, and use a threshold selected on validation set to generate the final prediction during testing. In our pilot experiments, we find the latter one converges faster and performs better, so the latter one is used in this paper.
