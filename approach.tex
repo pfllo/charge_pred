@@ -22,7 +22,7 @@ Our approach follows four steps as depicted in Figure \ref{fig_model_framework}.
 % Our document encoder module is based on the framework of Hierarchical Neural Network (HAN) proposed by \cite{yang2016hierarchical}. The overview of our document encoder is shown in Figure \ref{fig_doc_encoder}. 
 Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. As suggested by \cite{tang2015document,yang2016hierarchical}, the document embedding problem can be converted to two sequence embedding problems. As shown in Figure \ref{fig_doc_encoder}, we can first embed each sentence using a sentence-level sequence encoder, and then aggregate them with a document-level sequence encoder to generate the document embedding $\mathbf{d}$. 
 % Therefore, the key problem of document embedding converts to building an effective sequence encoder.
-Although it is possible to use different models for these two sequence encoders, we simply use the same architecture here for simplicity.
+Although it is possible to use different models for these two sequence encoders, we use the same architecture here for simplicity.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -42,7 +42,7 @@ Although it is possible to use different models for these two sequence encoders,
 
 
 \paragraph{Bi-GRU Sequence Encoder} 
-A prominent challenge in building a sequence encoder is how to take the correlation of each elements into consideration. A promising solution is the bi-directional gated recurrent unit (Bi-GRU) model proposed by \cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
+A challenge in building a sequence encoder is how to take the correlation of each elements into consideration. A promising solution is the bi-directional gated recurrent unit (Bi-GRU) model proposed by \cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
 Specifically, Bi-GRU first uses a forward and a backward GRU~\cite{cho2014learning}, which is a kind of Recurrent Neural Network (RNN), to encode the sequence in two opposite directions, and then concatenate the results of both GRUs to form the final outputs. 
 
 Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathbf{x}_t$ is the input embedding of element $t$, the state of Bi-GRU at position $t$ is:
