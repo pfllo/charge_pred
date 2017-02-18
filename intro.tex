@@ -73,14 +73,14 @@ ignoring the fact that they could benefit from each other.
 
 Recent advances in neural networks enable us to jointly model charge prediction and relevant 
 article extraction in a unified framework, %which enables them to influence each other \orange{in a positive way}.
-where the latent correspondence from the textual fact descriptions about a case to its related law articles 
-and further to its charges can be explicitly addressed by a \red{stack attention} mechanism.
+where the latent correspondence from the fact descriptions about a case to its related law articles 
+and further to its charges can be explicitly addressed by a \orange{two-stack attention} mechanism.
 Specifically,   %to understand the \orange{whole framework} of the facts, inspired by previous works on document classification \cite{tang2015document,yang2016hierarchical}, 
-we use a sentence-level and a document-level Gated Recurrent Units (GRU) \red{with fact-level attention} to model the associations among words and sentences, in order to capture \orange{the whole story as well as important details of the case}.  
+we use a sentence-level and a document-level Bi-directional Gated Recurrent Units (Bi-GRU)~\cite{bahdanau2015neural} \orange{with a stack of fact-side attention modules} to model the associations among words and sentences, in order to capture \orange{the whole story as well as important details of the case}.  
 %To capture the important details, we use attention mechanism to select the most informative words or sentences for sentence and document embedding respectively. 
 %To handle the multi-label nature of the problem, we convert the multi-label target to label distribution, and then use cross entropy as loss function. 
 % We find this method works well in our experiments and significantly outperforms the baseline BOW method.
-Given the analysis about the fact descriptions, we accordingly learn to attentively select the most supportive law articles from the statutory laws  to support our charge prediction, which is investigated in a multi-label paradigm.
+Given the analysis about the fact descriptions, we accordingly learn \orange{a stack of article-side attention modules} to attentively select the most supportive law articles from the statutory laws  to support our charge prediction, which is investigated in a multi-label paradigm.
 %we first use a simple BOW-based article classifier to quickly \orange{filter out most of the irrelevant articles}. 
 %Then we attentively aggregate the retained top $k$ articles for further charge classification.
 % Although the top $k$ articles are noisy, the experimental results show that our attentive aggregation module can further attend to relevant ones and thus improve the prediction performance. 
