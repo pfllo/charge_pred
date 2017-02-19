@@ -54,7 +54,7 @@ can only be applied to a small set of articles and does not fit to real applicat
 %scale to the situation when a larger set of articles are involved. 
 Recent improvement takes a two-step approach by performing 
  % \cite{liu2015predicting} aims to find relevant articles in a scalable way by doing
-a preliminary classification first and then reranking the results with word-level and article-level features~\cite{liu2015predicting}. 
+a preliminary classification first and then re-ranking the results with word-level and article-level features~\cite{liu2015predicting}. 
 %Although the framework is promising, only shallow, i.e., word-level, semantic features are employed in their work. 
 These efforts  advance the applications of machine learning and natural language processing methods into legal assistance services, however, they are still in an early stage, e.g., relying on expert knowledge, % expert-designed rules, 
 using relatively simple classification paradigms, and shallow textual analysis. More importantly, related tasks, e.g., charge prediction and relevant article extraction,  are 
@@ -92,7 +92,9 @@ from which we can automatically extract
 %Since the public judgement documents often contain 
 \textit{fact descriptions}, \textit{relevant law articles} and \textit{the charges} using simple rules, as shown in Figure~\ref{fig_example_case}.
 %, we use rules and regular expressions to extract these information and build a dataset accordingly. 
-Experimental results show that our neural network method can effectively predict appropriate charges for a given case, and also provide relevant law articles as legal basis to support the prediction. Our experiments also confirm that, apart from providing legal basis, relevant articles also contain \orange{useful information} that can help to improve charge prediction in \orange{the civil law system}.
+Experimental results show that our neural network method can effectively predict appropriate charges for a given case, and also provide relevant law articles as legal basis to support the prediction. 
+\orange{We also quantitively discuss the contribution of fact-side and article-side information for charge predicion by comparing different variants of our model.} 
+Our experiments also confirm that, apart from providing legal basis, relevant articles also contain \orange{useful information} that can help to improve charge prediction in \orange{the civil law system}.
 %Furthermore, since there exist differences between the words used by laymen and legal practitioners, 
 We also examine our model on the news reports about criminal cases composed by journalists.
 %and the results show that, 

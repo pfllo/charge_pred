@@ -11,7 +11,7 @@ there are also works focusing on identifying applicable law articles for a given
 \cite{liu2005classifying,liu2006exploring} convert this multi-label problem into a multi-class classification problem by only considering a fixed set of article combinations, which cannot scale well since the number of possible combinations will grow exponentially when a larger set of law articles are considered.
 \cite{liu2015predicting} instead design a scalable two-step approach %way to find relevant law articles, 
 by first using Support Vector Machine (SVM) for preliminary article classification, and then 
-rerank the results using the similarity between the words in facts and articles, and \orange{the co-occurence tendency} among law articles as indicators.
+re-rank the results using the similarity between the words in facts and articles, and \orange{the co-occurence tendency} among law articles as indicators.
 % use some reranking methods to get the final relevant article list. 
 We also utilize SVM to extract top $k$ candidate articles, but further adopt Bi-GRU and a stack of article-side attention modules to better understand the texts and exploring the correlation among articles. 
 % However, to better understand the association between facts and articles, we use attention mechanism to distinguish relevant ones in the top $k$ extraction results. \orange{To make our model fully differenciable,} rather than using frequent pattern mining techinque, we use RNN to model the correlations among articles.
