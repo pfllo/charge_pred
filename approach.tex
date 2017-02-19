@@ -117,46 +117,59 @@ By using this sequence encoder for fact embedding, the fact-side attention modul
 
 
 \subsection{Using Law Articles} 
-One of the challenges of utilizing law articles to support our charge prediction lies in the fact that statutory laws contain a large number of law articles and there are usually multiple articles involved in one case, \red{which require complex classification models, time-consuming in both training and predicting.} %, and run slowly in \orange{production environment} as well. 
-
-We thus adopt a two-step approach.% to resolve this problem. 
-Specifically, at the first step, we use a fast and easy-to-scale classifier to filter out a large fraction of irrelevant articles, and retain the top $k$ articles for the next step. Then, we use neural network to make conprehensive understanding of the top $k$ articles, and then use the \orange{article-side attention module stack to select the most supportive ones for charge classification.}
+One of the key challenges of utilizing law articles to support our charge prediction lies in the fact that statutory laws contain a large number of law articles and there are usually multiple articles involved in one case, \red{which require complex classification models, time-consuming and hard to generalize.} %in both training and predicting, and run slowly in \orange{production environment} as well. 
+%
+We thus adopt a two-step approach, % to resolve this problem. 
+specifically, we first build a fast and easy-to-scale classifier to filter out a large fraction of irrelevant articles, and retain the top $k$ articles. Then, we use neural networks to make comprehensive understanding of the top $k$ articles, and further benefit from the article-side attention module to select the most supportive ones for charge classification.
 
 \paragraph{Top $k$ Article Extractor}
 \label{sec_article_extractor}
-We consider the relevant article extraction task as multiple binary classification tasks. Specifically, since 321 distinct law articles in the Criminal Law of the People's Republic of China are mentioned in our dataset, we therefore build 321 binary classifiers where each classifier focuses on the relevance of a specific article. When more articles are considered,
+We consider the relevant article extraction task as multiple binary classifications. Specifically, for each article, we build a binary classifier focusing on the relevance of this specific article, resulting in 321 binary classifiers corresponding to the 321 distinct law articles 
+%from the Criminal Law of the People's Republic of China 
+appearing in our dataset.
+%, we therefore build 321 binary classifiers where each classifier focuses on the relevance of a specific article. 
+When more articles are considered,
 % (e.g. articles in the Anti-Drug Law of the People's Republic of China), 
 we can simply add more binary classifiers accordingly, with the existing classifiers untouched.
 
-We use bag-of-words-based SVM as our binary classifier, which is fast and performs well in text classification~\cite{joachims2002learning,wang2012baselines}. Specifically, we use bag-of-words TF-IDF features, chi-square for feature selection and SVM with linear kernel for binary classification. The articles are ranked by the output score and the top $k$ articles are retained for each judgement document.
+We use word-based SVM as our binary classifier, which is fast and performs well in text classification~\cite{joachims2002learning,wang2012baselines}. Specifically, we use bag-of-words TF-IDF features, chi-square for feature selection and linear kernel for binary classification. 
+\red{Although the output scores by different classifiers may be not be compared directly, 
+we consider them as a kind of confidence  and keep the top $k$ articles with the highest confidence.}% are retained for each judgement document.
+
 
 \paragraph{Article Encoder}
 \label{sec_article_encoder}
-Since each law article may contain multiple sentences, as shown in Fig.~\ref{fig_model_framework}, we also use the document encoder described in Section \ref{sec_doc_encoder} to generate the article embedding $\mathbf{a}_j, j\in [1, k]$ for the top $k$ articles. 
-While using similar architecure, this document encoder differs from the one used for fact embedding that, instead of using global context vectors, its word-level context vector $\mathbf{u}_{aw}$ and sentence-level context vector $\mathbf{u}_{as}$ are generated dynamically for each case from the fact embedding $\mathbf{d}_f$:
+Since each law article may contain multiple sentences, 
+as shown in Fig.~\ref{fig_model_framework}, we also use the document encoder described in Sec.~\ref{sec_doc_encoder} to produce an embedding $\mathbf{a}_j, j\in[1, k]$ for each article in the top $k$ extracted articles. 
+While using similar architecture, this article encoder differs from the fact encoder that, instead of using global context vectors, its word-level context vector $\mathbf{u}_{aw}$ and sentence-level context vector $\mathbf{u}_{as}$ are dynamically generated  for each case according to its corresponding fact embedding $\mathbf{d}_f$:
 \begin{equation}
 \mathbf{u}_{aw} = \mathbf{W}_w \mathbf{d}_f + \mathbf{b}_w;\ \ \ \ \mathbf{u}_{as} = \mathbf{W}_s \mathbf{d}_f + \mathbf{b}_s
 \label{eq_dynamic_context_vec}
 \end{equation}
-where $\mathbf{W}$ is the weight matrix and $\mathbf{b}$ is the bias. 
-The context vectors, i.e., $\mathbf{u}_{aw}$ and $\mathbf{u}_{as}$, are then used to produce word-level and sentence-level attention values respectively.
-By dynamically generating context vectors, the fact embedding $\mathbf{d}_f$ actually guide the model to attend to informative words or sentences with respect to the facts of each case, rather than just selecting \orange{generally informative ones}.
+where $\mathbf{W_*}$ is the weight matrix and $\mathbf{b_*}$ is the bias. 
+The context vectors, $\mathbf{u}_{aw}$ and $\mathbf{u}_{as}$, are used to produce the word-level and sentence-level attention values,  respectively.
+%By dynamically generating context vectors, 
+Through the dynamic context vectors, the fact embedding $\mathbf{d}_f$ actually guides our model to attend to informative words or sentences with respect to the facts of each case, rather than just selecting generally informative ones.
 
 
 
 \paragraph{Attentive Article Aggregator}
 % The article aggregator aims to generate an aggregated embedding for the top $k$ articles. Since not all the articles are relevant, the difficulty here is how to distinguish relevant articles from irrelevant ones.
-The article aggregator aims to find the articles that are supportive for charge prediction from the top $k$ extractions, and accordingly generate an aggregated article embedding.
+The article aggregator aims to find supportive articles for charge prediction from the top $k$ extraction, and accordingly produce an aggregated article embedding.
 % generate an aggregated embedding for the top $k$ articles
-
+%
 % attend more to relevant articles while trying to ignore the irrelevant ones. 
-
+%
 % Due to the inferior classification ability of the relevant article extractor, the order of the top $k$ articles are not \orange{very meaningful}. Therefore, the top $k$ articles are more of a set than a sequence. 
-Due to the unreliability of the order of the top $k$ articles, these articles are more of a set than a sequence.
-However, as suggested by \cite{vinyals2016matching}, when encoding a set, it is still beneficial to embed the context of each element with a bidirectional RNN.
-In our task, specifically, using bi-directional RNN is beneficial to model the co-occurence tendency of relevant articles.
+%Due to the unreliability of the order of the top $k$ articles, these articles are more of a set than a sequence.
+\red{ Although the top $k$ extracted articles are more like a set, rather than a sequence, }
+%However, as suggested by \cite{vinyals2016matching}, when encoding a set, 
+\red{it is still beneficial to embed the context of each element using a bidirectional RNN\cite{vinyals2016matching}.}
+In our task, bi-directional RNN may help capture the co-occurrence of relevant articles.
 
-Therefore, we use the attentive sequence encoder in Section \ref{sec_att_seq_encoder} to generate the aggregated article embedding $\mathbf{d}_a$. Again, to guide the attention with fact descriptions, we also dynamicall generate the article-level context vector $\mathbf{u}_{ad}$ by:
+Specifically, we use the attentive sequence encoder in Sec.~\ref{sec_att_seq_encoder} 
+to produce the aggregated article embedding $\mathbf{d}_a$. 
+Again, to guide the attention with fact descriptions, we dynamically generate the article-level context vector $\mathbf{u}_{ad}$ by:
 % Equation \ref{eq_dynamic_context_vec}, but with another set of parameters.
 \begin{equation}
 \mathbf{u}_{ad} = \mathbf{W}_d \mathbf{d}_f + \mathbf{b}_d
@@ -164,9 +177,9 @@ Therefore, we use the attentive sequence encoder in Section \ref{sec_att_seq_enc
 
 
 \subsection{The Output}
-To generate the charge prediction, we first concatenate the document embedding $\mathbf{d}_f$ and the aggregated article embedding $\mathbf{d}_a$, and feed them to two consecutive full connection layers to generate a new vector $\mathbf{d}'$. Then, $\mathbf{d}'$ is passed to a softmax classifier to generate the predicted charge distribution. We use the validation set to determine a threshold $\tau$, and consider all the charges with output probability higher than $\tau$ as positive predictions.
+To make the final charge prediction, we first concatenate the document embedding $\mathbf{d}_f$ and the aggregated article embedding $\mathbf{d}_a$, and feed them to two consecutive full connection layers to generate a new vector $\mathbf{d}'$, which is then passed to a softmax classifier to produce the predicted charge distribution. We use the validation set to determine a threshold $\tau$, and consider all the charges with output probability higher than $\tau$ as positive predictions.
 % Note that although other multi-label classification paradigms are also applicable to our problem (see Section \ref{sec_related_work}), we use this method because it performs best in our pilot experiments. 
-Also note that the input to the first full connection layer can also be $\mathbf{d}_f$ only, which means we do not use the information from relevant law articles.
+The input to the first full connection layer can also be \red{either $\mathbf{d}_f$, or $\mathbf{d}_a$ only, which means we can use either fact or article only to make the prediction}.
 % (see comparison in Section \ref{sec_main_results}). 
 
 As for training, we use cross entropy as our loss function:
@@ -174,11 +187,13 @@ As for training, we use cross entropy as our loss function:
 \label{original_loss}
 Loss= -\sum_{i=1}^N\sum_{l=1}^L{y_{il} log(o_{il})}
 \end{equation} 
-where $N$ is the number of training data, $L$ is the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ of datum $i$. Here the target charge distribution $\mathbf{y}$ is generated by setting positive labels to $\frac{1}{m}$ and negative labels to $0$, where $m$ is the number of positive labels.
+where $N$ is the number of training data, $L$ the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ \red{for case} $i$. The target charge distribution $\mathbf{y}$ is produced by setting positive labels to $\frac{1}{m}$ and negative labels to $0$, where $m$ is the number of positive labels for the current case.
 
 \paragraph{Supervised Article Attention}
-Since the judgement documents also contain gold standard relevant law articles, we can therefore use this information to \orange{supervise} the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold standard articles in the top $k$ extractions.
-
+%Since the judgement documents also contain gold standard relevant law articles, 
+we can also utilize the gold-standard law articles naturally in the judgement documents
+to \orange{supervise} the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold-standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold-standard articles in the top $k$ extractions.
+%
 % : \todo{can be simplified}
 % \begin{equation}
 % t_j=
@@ -188,8 +203,8 @@ Since the judgement documents also contain gold standard relevant law articles, 
 % \end{cases}
 % \end{equation}
 % where $\mathbb{A}$ is the set of indices of the gold standard articles in the top $k$ extracted articles, and $|\mathbb{A}|$ is the size of set $\mathbb{A}$. 
-
-We still use cross entropy here, and the loss function is:
+%
+We, again, use cross entropy, and the loss function is:
 \begin{equation}
 \label{final_loss}
 Loss = -\sum_{i=1}^N(\sum_{l=1}^L{y_{il} log(o_{il})} + \beta \sum_{j=1}^k{t_{ij} log(\alpha_{ij})})
