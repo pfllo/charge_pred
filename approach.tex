@@ -9,7 +9,7 @@
 
 \section{Our Approach}
 % In order to generate reasonable charge prediction, 
-As depicted in Fig.~\ref{fig_model_framework}, our approach contains the following steps . 
+As depicted in Fig.~\ref{fig_model_framework}, our approach contains the following steps.
 (1) The input fact description is fed to a document encoder to generate the fact embedding $\mathbf{d}_f$, where $\mathbf{u}_{fw}$ and $\mathbf{u}_{fs}$ are global word-level and sentence-level context vectors used to attentively select informative words and sentences.
 (2) Concurrently, the fact description is also passed to an article extractor to find top $k$ relevant law articles. 
 (3) These articles are embedded by another document encoder, and  passed to an article aggregator to attentively select supportive articles, and produce the aggregated article embedding $\mathbf{d}_a$. Specifically, three context vectors, i.e., $\mathbf{u}_{aw}$, $\mathbf{u}_{as}$ and $\mathbf{u}_{ad}$ are dynamically generated from $\mathbf{d}_f$, to enhance the article document encoder and the article aggregator. 
@@ -25,7 +25,8 @@ The document embedding problem, therefore, can be converted to two sequence embe
 sentence using a sentence-level sequence encoder, and then aggregate them with a document-level sequence 
 encoder to produce the document embedding~$\mathbf{d}$. 
 % Therefore, the key problem of document embedding converts to building an effective sequence encoder.
-Although it is possible to use different architectures for these two encoders, we use the same here for simplicity.
+% Although it is possible to use different architectures for these two encoders, we use the same here for simplicity.
+While these two encoders can have different architectures, we use the same here for simplicity.
 
 \vspace{-.5em}
 \begin{figure}[htbp]
@@ -47,7 +48,7 @@ Although it is possible to use different architectures for these two encoders, w
 
 
 \paragraph{Bi-GRU Sequence Encoder} 
-A challenge in building a sequence encoder is how to take \red{the correlation among different  elements} into consideration. A promising solution is the Bi-directional Gated Recurrent Units (Bi-GRU) model~\cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
+A challenge in building a sequence encoder is how to take the \orange{correlation} among different elements into consideration. A promising solution is the Bi-directional Gated Recurrent Units (Bi-GRU) model~\cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
 Specifically, Bi-GRU first uses a forward and a backward GRU~\cite{cho2014learning}, which is a kind of RNN, to encode the sequence in two opposite directions, and then concatenate the states of both GRUs to form its own states. 
 
 Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathbf{x}_t$ is the input embedding of element $t$, the state of Bi-GRU at position $t$ is:
