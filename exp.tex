@@ -1,20 +1,21 @@
 \section{Experiments}
 \subsection{Experimental Setup}
-We use HanLP\footnote{\url{https://github.com/hankcs/HanLP}} for Chinese word segmentation and POS tagging. 
-We use word2vec~\cite{mikolov2013distributed} to train our word embeddings with judgement documents, and web pages from several legal forums as well as Baidu Encyclopedia. The resulting word embeddings contain  573,353 words, with 100 dimension.  
+We use HanLP\footnote{\url{https://github.com/hankcs/HanLP}} for Chinese word segmentation and POS tagging.
+Word embeddings are trained using word2vec~\cite{mikolov2013distributed} on judgement documents, web pages from several legal forums and Baidu Encyclopedia. The resulting word embeddings contain 573,353 words, with 100 dimension.
+% We use word2vec~\cite{mikolov2013distributed} to train our word embeddings with judgement documents, and web pages from several legal forums as well as Baidu Encyclopedia. The resulting word embeddings contain  573,353 words, with 100 dimension.  
 %As for word embeddings, we use Baidu Encyclopedia, 3 million judgement documents and 3 million legal question answer pairs crawled from multiple legal forums as corpus, and the word2vec~\cite{mikolov2013distributed} for training. 
 %The size of the resultant word embedding is 100-d and there are 573,353 words in total. 
 % During training and testing, all the time expressions, names and charges\footnote{Although rare, sometimes the charge may appear in the fact part. This conversion ensures that we do not use this information.} in the text are converted to 3 special tokens separately and the words not in the pre-trained word embeddings are converted to another special token. All the word embeddings remain unchanged during training except for the special tokens. 
 We randomly initialize a 50-d vector for each POS tag, which is concatenated with the word embedding as the final input.
 Each GRU in the Bi-GRU is of size 75, the two full connection layers are of size 200 and 150.
-The relevant article extractor generates top 20 articles, and the weight of the article attention loss ($\beta$ in Eq.~\ref{final_loss}) is 0.1. 
+The relevant article extractor generates top 20 articles, the weight of the article attention loss ($\beta$ in Eq.~\ref{final_loss}) is 0.1, and prediction threshold $\tau$ is 0.4.
 We use Stochastic Gradient Descent (SGD) for training, with learning rate 0.1, and batch size 8.
 % We also clip the gradient so that the sum of square of the L2 norms of the trainable tensors does not exceed 5. 
 % To accelerate the training, we constrain the number of sentences of each fact description to be less than 50 and the the maximum length of each fact sentence to be 50. As for articles, we constrain the maximum length of each sentence to be 30. 
 %The chi-square feature selector keeps the top 2,000 features.
 % , and we use the SVM model implemented in scikit-learn \cite{scikit-learn} in our experiments.
 
-We compare our full model with two variations: without \red{article attention supervision} and with fact only as input. We also implement an SVM model, which proves to be effective in \orange{many text classification tasks}~\cite{wang2012baselines,aletras2016predicting}. Specifically, the SVM model takes bag-of-words TF-IDF features as input, and uses chi-square to select top 2,000 features.
+We compare our full model with two variations: without \red{article attention supervision} and \orange{only using facts for charge prediction}. We also implement an SVM model, which proves to be effective in \orange{many text classification tasks}~\cite{wang2012baselines,aletras2016predicting}. Specifically, the SVM model takes bag-of-words TF-IDF features as input, and uses chi-square to select top 2,000 features.
 
 
 \begin{table}
@@ -22,8 +23,10 @@ We compare our full model with two variations: without \red{article attention su
 \small{
 \begin{tabular}{|c|c|c|c|}
 \hline
-\textbf{Model}				& \tabincell{c}{\textbf{Precision}} 	& \tabincell{c}{\textbf{Recall}} 		& \tabincell{c}{\textbf{F1}} 	\\
-\hline
+% \multirow{2}{|c|}{Model} & \multicolumn{3}{c|}{\tabincell{c}{ (\textit{Micro-/Macro-}) }}
+\multirow{2}{*}{\textbf{Model}}				& \tabincell{c}{\textbf{Precision}} 	& \tabincell{c}{\textbf{Recall}} 		& \tabincell{c}{\textbf{F1}} 	\\
+% \hline
+\cline{2-4}
                                                & \multicolumn{3}{c|}{\tabincell{c}{ (\textit{Micro-/Macro-}) }}\\
 \hline
 \textit{SVM} 				& \textbf{93.94}/79.53					& 77.66/49.54  					& 85.03/61.05 				 	\\
@@ -31,6 +34,8 @@ We compare our full model with two variations: without \red{article attention su
 \textit{SVM\_article} 			& 91.77/71.33					& 72.10/45.85  					& 80.76/55.82				 	\\
 \hline
 \textit{NN}				& 91.30/\textbf{83.32}			& 87.39/74.99  					& 89.31/78.94					\\
+\hline
+\textit{NN\_article\_only} 			& 90.09/81.50				& 86.10/69.62				& 88.05/75.10		\\
 \hline
 \textit{NN\_article}			& 90.79/83.07					& 88.42/75.73  					& 89.59/79.23					\\
 \hline
@@ -43,14 +48,14 @@ We compare our full model with two variations: without \red{article attention su
 % \hline
 \textbf{\textit{NN\_gold\_article$^*$}} 		& 98.78/\textbf{95.26} 			& \textbf{98.24/95.57} 			& \textbf{98.51/95.42} 			\\
 \hline
-\hline
-\textit{NN\_article\_only} 			& 90.09/81.50				& 86.10/69.62				& 88.05/75.10		\\
-\hline
-\textit{NN\_gold\_only$^*$} 		& 97.22/92.39				& 98.36/94.73				& 97.79/93.55		\\
-\hline
+% \hline
+% \textit{NN\_article\_only} 			& 90.09/81.50				& 86.10/69.62				& 88.05/75.10		\\
+% \hline
+% \textit{NN\_gold\_only$^*$} 		& 97.22/92.39				& 98.36/94.73				& 97.79/93.55		\\
+% \hline
 \end{tabular}
 }
-\caption{Charge prediction results. $^*$ refers to using gold standard (rather than extracted) articles during training and testing. Left side and right side of the slash refer to micro and macro statistics, respectively.}
+\caption{Charge prediction results. $^*$ refers to using gold standard articles during training and testing. Left and right side of the slash refer to micro and macro statistics, respectively.}
 \label{tabble_main_results}
 \end{table}
 
@@ -63,63 +68,68 @@ We compare our full model with two variations: without \red{article attention su
 %The charge prediction results are summarized in Table \ref{tabble_main_results}. 
 % The left side of the slash refers to micro statistics, and the right side refers to macro statistics. 
 % Micro precision (or recall) is the the number of correct predictions divided by the total number of predictions (or the total number of gold standard charges), while the macro precision (or recall) is the sum of the precision (or recall) of each charge divided by the number of distinct charges. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
-We evaluate the charge prediction task using precision, recall and F1, in both macro and micro level. 
-The macro precision/recall are calculated by averaging over %the precision/recall of 
+We evaluate the charge prediction task using precision, recall and F1, in both macro and micro level.
+The macro precision/recall \orange{are} calculated by averaging over %the precision/recall of 
 each charge, and the micro ones are averaged  over each prediction. %In other words, macro statistics give equal weight to each charge, while micro statistics give equal weight to each individual prediction. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
 
 
 %The $Acc.$ refers to instance accuracy, which is the number of instances whose classes are all correctly predicted divided by the total number of instances.
 
-As shown in Table~\ref{tabble_main_results}, we can see that, the basic \texttt{SVM} model, 
-which only takes fact descriptions as input, indeed proves to be a strong baseline. 
-By contrast, our \red{plain} neural network model (\texttt{NN}) outperforms \texttt{SVM} 
-by around 4\% in micro-F1, since \texttt{NN} benefits from  the pre-trained word embeddings and 
-a two-level GRU architectures, thus can attentively recognize informative expressions from the description and
- better capture the underlying correspondence from fact descriptions to appropriate charges, 
-\red{even there is less overlap in the words used between cases with the same charge, 
-or there are limited training data for infrequent charges. This may also explain that NN based models
-have more balanced improvement across different charges, leading to more prominent improvements over 
-SVM ones in macro- metrics, which usually have a strong bias towards frequent charges.} 
+As shown in Table~\ref{tabble_main_results}, %we can see that, 
+the basic \texttt{SVM} model,
+which only takes fact descriptions as input, indeed proves to be a strong baseline.
+By contrast, our \red{plain} neural network model (\texttt{NN}), which also only uses facts for prediction, outperforms \texttt{SVM} 
+by around 4\% in micro-F1.
+Since \texttt{NN} benefits from the pre-trained word embeddings,
+a two-level Bi-GRU architecture, and \orange{the fact-side attention modules},
+it can thus attentively recognize informative expressions from the description and 
+better capture the underlying correspondence from fact descriptions to appropriate charges,
+\orange{even when there is less overlap in the words used among cases with the same charge,
+or when there are limited training data (i.e., infrequent charges). This may also explain that NN based models 
+have more balanced performance across different charges, leading to more prominent improvements over 
+SVM ones in macro metrics, which usually have a strong bias towards frequent charges.}
 %
 
 %This actually indicates the nature of the civil law system that judgements are made based on statutory laws rather than decisions of previous cases.
 
-When we use both facts and the extracted relevant law articles (that are admittedly noisy),  
-the SVM version (\texttt{SVM\_article}) drops by around~5\% than \texttt{SVM}, since the SVM model 
-cannot benefit from the extracted, thus admittedly noisy, relevant articles in such a straightforward way. 
+When we use both the facts and the extracted relevant law articles (that are admittedly noisy),
+the SVM version (\texttt{SVM\_article}) drops by around~5\% than \texttt{SVM}, \orange{showing that} the SVM model 
+cannot benefit from the extracted, thus noisy, relevant articles in such a straightforward way.
 However, our NN version (\texttt{NN\_article}) can still learn from  the noisy article extractions through 
-attentively aggregating those extracted articles even without direct guidance, 
-thus improves \texttt{NN} by around 0.4\%. 
-Furthermore, if we use the gold standard articles during training to \red{supervisedly} train the 
+attentively aggregating those extracted articles even without direct guidance,
+thus improves \texttt{NN} by around 0.4\%.
+Furthermore, if we use the gold standard articles during training as supervision for the 
 article attention (our full model, \texttt{NN\_supv\_article}), the performance can be further improved, achieving 
-90.21\% and 80.48\% in micro- and macro-F1, respectively.
+90.21\% and 80.48\% in micro and macro F1, respectively.
 %This proves that it is important to take relevant law articles into considerations for charge prediction.
-This actually indicates the nature of the civil law system that judgements are made based on statutory laws rather than decisions of previous cases
+\orange{The improvements made by using relevant law articles actually indicates the nature of the civil law system that judgements are made based on statutory laws rather than decisions of previous cases.}
 
-However,  if we use extracted relevant articles only to make the prediction (\texttt{NN\_article\_only}\footnote{ 
-\red{\texttt{NN\_article\_only} utilizes fact embeddings to attentively aggregate relevant articles, but only use 
-the aggregated article embedding $\mathbf{d}_a$, without fact embedding  $\mathbf{d}_f$,  for charge prediction.}}),
-even with the proved-helpful attentive aggregation mechanism, the model performs worst among all NN
-variants (though still better than \texttt{SVM}). \red{This  indicates that  it is necessary to consider both fact description and 
+However, if we only use the extracted relevant articles to make the prediction (\texttt{NN\_article\_only}\footnote{
+\texttt{NN\_article\_only} utilizes fact embeddings to attentively aggregate relevant articles, but only use 
+the aggregated article embedding $\mathbf{d}_a$, without fact embedding  $\mathbf{d}_f$,  for charge prediction.}),
+even with the proved-helpful attentive aggregation mechanism, the model performs worst among all NN 
+variants (though still better than \texttt{SVM}). This  indicates that  it is necessary to consider both fact description and 
 relevant law articles for charge prediction, and,
-although the judgments are made based on the statutory laws in the civil law systems, 
- the \textbf{logical thinking or legal reasoning} of the court behind the formal decisions, 
-to some extent, may be implicitly captured through the fact-charges paris.
-}
+\orange{the fact that \texttt{NN} outperforms \texttt{NN\_article\_only} also indicates that although the judgments are made based on the statutory laws in the civil law system,
+the \textbf{logic of legal reasoning} %\textbf{logical thinking or legal reasoning} 
+employed by the court when making decisions,
+% of the court behind the formal decisions, 
+to some extent, may be implicitly captured through massive fact-charges paris.}
 
 
-\red{Now  a question comes out: \textit{how much improvement can we have by expoiting the relevant law articles within the civil law system?} }
-Let us consider an ideal case that we can access both fact descriptions and the gold standard law articles during testing, which could be considered as an upper bound scenario.  
+
+\red{Now the question is: \textit{how much improvement can we have by expoiting the relevant law articles within the civil law system?}}
+Let us consider an ideal situation where we can access both fact descriptions and the gold standard law articles \orange{during testing}, which could be considered as an upper bound scenario.
 The SVM version \texttt{SVM\_gold\_article} significantly outperforms %\texttt{SVM} by around 27\% in macro-F1, and especial
-  \texttt{SVM\_article} by more than 30\% in macro-F1. 
-And the NN version upper-bound (\texttt{NN\_gold\_article}) outperforms
-our best article-version \texttt{NN\_supv\_article} by at least 8\%, and no surprisingly, \texttt{NN\_article} by more than 10\%.
+\texttt{SVM\_article} by more than 30\% in macro-F1.
+And the NN version upper-bound (\texttt{NN\_gold\_article}) outperforms 
+our best article-version (\texttt{NN\_supv\_article}) by \orange{over} 8\%, and no surprisingly, \texttt{NN\_article} by more than 10\%.
 %
-These comparisons confirm again that
- law articles play an important role for automatic judgement prediction, but
+These comparisons confirm again that 
+law articles play an important role for automatic judgement prediction, but 
 the extracted relevant articles inevitably contain noise, which should be properly 
 handled, e.g., using an attentively aggregation mechanism to distill 
-valuable evidence to support the charge prediction. 
+valuable evidence to support the charge prediction.
 
 
 
@@ -161,15 +171,15 @@ valuable evidence to support the charge prediction.
 
 \paragraph{Case Study}
 We study the model outputs and find certain star-like confusion patterns among the charges. For example, \emph{intentional injury} %(\emph{pivot charges}) 
-is  often  confused with %multiple charges (\emph{peripheral charges}) like 
-\emph{intentional homicide} (when the victim is dead, and the difference is %it differs from \emph{intentional injury} in
- whether the defendant intends to kill  or just hurt the victim) and \emph{picking quarrels and provoking troubles} 
-(there may also exist injuries here). 
+is often confused with %multiple charges (\emph{peripheral charges}) like 
+\emph{intentional homicide} (when the victim is dead, the difference is %it differs from \emph{intentional injury} in
+ whether the defendant intends to kill  or just hurt the victim) and \emph{picking quarrels and provoking troubles}
+(there may also exist injuries here).
 % We refer to charges can be confused with multiple charges as \emph{pivot charges}, and the charge often confused with a single charge as \emph{peripheral charges} here.
-These charges usually share similar fact descriptions, e.g., how the injuries are caused, and the \emph{intentional injury}  appears more frequently than the others,  \texttt{SVM} thus  outputs  \emph{intentional injury} in almost all situations, and  fails to distinguish these charges.  
-However, by using GRU and the attention mechanism, \texttt{NN} can attend to important details of the facts and significantly improves the performance on these charges. 
+These charges usually share similar fact descriptions, e.g., how the injuries are caused, and the \emph{intentional injury} appears more frequently than the others. \texttt{SVM} thus outputs \emph{intentional injury} in \orange{most} situations, and fails to distinguish these charges.
+However, by using GRU and the attention mechanism, \texttt{NN} can attend to important details of the facts and significantly improves the performance on these charges.
 %On the other hand, these learned patterns are not reliable enough, and lead to limited improvements on pivot charges.
-When the direct supervision for articles is available,  \texttt{NN\_supv\_article}  can enhance the interaction between certain pairs of descriptions and law articles, which help to capture the subtle differences among similar charges,  and further improve the performance. 
+When the direct supervision for articles is available,  \texttt{NN\_supv\_article}  can enhance the interaction between certain pairs of descriptions and law articles, which help to capture the subtle differences among similar charges, and further improve the performance.
 %and therefore learns more elaborated patterns, which significantly improve the pivot charges while less prominent improvements on other easily confused charges are made as well.
 
 % On the other hand, while \texttt{NN\_supv\_article} also improves \texttt{NN} on these this kind of charges, a \orange{considerable} amount of improvements comes from the charges that can be confused with multiple charges, e.g., \emph{intentional injury} is also often confused with \emph{picking quarrels and provoking troubles} since there will also be injuries in the latter one, indicating that the additional information from relevant law articles can help the model handle the difficult charges better.
@@ -196,7 +206,7 @@ When the direct supervision for articles is available,  \texttt{NN\_supv\_articl
 We also evaluate our SVM article extractor, which achieves 
 %Our top $k$ article extractor achieves 
 77.60\%, 88.96\%, 94.21\% and 96.53\% recall regarding the top 5, 10, 20 and 30 articles, respectively.
-Although simple, the SVM extractor can obtain over 94\% recall for top 20 articles, which is good enough for further refinement. 
+Although simple, the SVM extractor can obtain over 94\% recall for top 20 articles, which is good enough for further refinement.
 However, the micro F1 of the extractor is only 61.08\% in the test set, which will lead to severe error propagation if we use them directly. Therefore, we design the article attention mechanism to handle the noise in the top 20 articles.
 
 % Our top $k$ article extractor achieves 94.21\% recall for the top 20 results, which is good enough to for the following refinement components. However, the recall of the top 5 results is 77.60\% and the micro F1 is only 61.08\%, which indicates that we still cannot trust its prediction results directly, and therefore need to expand the number of results to ensure enough recall for the following components. Furtherfore, we find that the recall of the top 30 results is only 2.32\% higher than the top 20 results, therefore we use the top 20 results in this paper.
@@ -225,7 +235,7 @@ However, the micro F1 of the extractor is only 61.08\% in the test set, which wi
 \hline
 \end{tabular}
 }
-\caption{Article Attention Performance}
+\caption{Refined Article Extraction Performance}
 \label{tab_article_att}
 \end{table}
 
@@ -256,34 +266,34 @@ However, the charge prediction performance does not always increase with the art
 \hline
 \end{tabular}
 }
-\caption{Performance (micro- statistics) on News Data}
+\caption{Performance (micro statistics) on News Data}
 \label{tabble_news_results}
 \end{table}
 
 \subsection{Performance on News Data}
 There are usually significant differences between the expressions used by legal practitioners and people without legal background, 
-thus it is important to see how our model  will perform on fact descriptions by non-legal professionals. 
+thus it is important to see how our model will perform on fact descriptions \orange{written} by \orange{non-legal professionals}.
 %
 %We evaluate our models  on news reports that are composed by general reporters,
 %where 
-We then manually annotate 100 reports by general reporters 
-from two news websites\footnote{\url{news.cn/legal} and \url{legal.people.com.cn}}, 
-containing 262 words averagely and 25 distinct charges.
+We then manually annotate 100 news reports %by general reporters 
+from two news websites\footnote{\url{news.cn/legal} and \url{legal.people.com.cn}},
+containing 262 words \orange{on average} and 25 distinct charges.
 %
-The results are shown in Table \ref{tabble_news_results}, where we only report micro statistics due to the small size of the dataset.
+The results are shown in Table \ref{tabble_news_results}, where we only report micro statistics \orange{due to the small size of the dataset.}
 %Also note that the size of the news test set is relatively small with regard to the number of charges, which results in less reliable macro statistics, we therefore only report  here.
 
 We can see that, \texttt{SVM} suffers a significant drop in F1 on the news data, %compared to on judgement documents,
-confirming the gap between the expressions used by legal practitioners and non-legal professionals, 
-given the BOW nature of  \texttt{SVM}.
+confirming the gap between the expressions used by legal practitioners and \orange{non-legal professionals},
+\orange{given the BOW nature of \texttt{SVM}.}
 Although \texttt{SVM} cannot generalizes well, the patterns learned by \texttt{SVM} are reliable in themselves, leading to a high precision.
-It is not surprising that our NN models  also suffers from the news genre, but with 10\%\~15\% less absolute drop in F1, and our  \texttt{NN\_supv\_article} can still achieve 79.12\% in F1, thanks to  our NN architectures. 
+It is not surprising that our NN models also suffers from the news genre, but with 10\%$\sim$15\% less absolute drop in F1, and our  \texttt{NN\_supv\_article} can still achieve 79.12\% in F1, \orange{thanks to our NN architectures}.
 %exists a performance drop, they are much better than the SVM model. This shows that the  gap in expressions can be resolved by using embedding methods to a some extent. 
-For example, the word 暴打 (beat up) is seldom used in judgement documents, 
+For example, the word 暴打 (beat up) is seldom used in judgement documents,
 making it hard for \texttt{SVM} to correctly utilize  暴打 as an indicator for injury related charges, but, %However, by using pre-trained word embeddings, 
 our NN models can associate it with its  near-synonymy  殴打 (beat), which is a formal expression in judgement documents.
-Furthermore, the clear improvement from \texttt{NN\_article} to \texttt{NN\_supv\_article} proves again the importance of  relevant articles 
-in supporting charge prediction, even in news domain. 
+Furthermore, the clear improvement from \texttt{NN\_article} to \texttt{NN\_supv\_article} \orange{proves again the importance of  relevant articles 
+in supporting charge prediction, even in news domain.}
 %we can see that the model using relevant articles (\texttt{\_article}) clearly outperforms \texttt{NN}, \orange{showing that relevant articles also provide valuable information in this situation.}
 
 % Also note that, since the news test set is relatively small regarding the number of charges, the macro statistics are not as meaningful as those in the judgement document test set. For example, correctly predicting a charge with only one instance will improve the macro precision and recall by 4\% (${1}\div{25}$). Therefore, \texttt{NN\_article} outperforms \texttt{NN\_supv\_article} in macro F1 by 4.38\% does not necessarily mean that it performs better on infrequent charges. 
