@@ -8,23 +8,27 @@ The charge prediction task aims at finding appropriate charges based on the fact
 Within the civil law system,
 there are also works focusing on identifying applicable law articles for a given case. 
 %\cite{liu2005classifying,liu2006exploring} try to find the specific law articles that have been violated in a case. 
-\cite{liu2005classifying,liu2006exploring} convert this multi-label problem into a multi-class classification problem by only considering a fixed set of article combinations, which cannot scale well since the number of possible combinations will grow exponentially when a larger set of law articles are considered.
+\cite{liu2005classifying,liu2006exploring} convert this multi-label problem into a multi-class classification problem by only considering a fixed set of article combinations, which cannot scale well since the number of possible combinations will grow exponentially when a larger set of 
+law articles are considered.
 \cite{liu2015predicting} instead design a scalable two-step approach %way to find relevant law articles, 
 by first using Support Vector Machine (SVM) for preliminary article classification, and then 
-re-rank the results using the similarity between the words in facts and articles, and \orange{the co-occurence tendency} among law articles as indicators.
+re-rank the results using the similarity between the words in facts and articles, and the co-occurence tendency among law articles as indicators.
 % use some reranking methods to get the final relevant article list. 
-We also utilize SVM to extract top $k$ candidate articles, but further adopt Bi-GRU and a stack of article-side attention modules to better understand the texts and exploring the correlation among articles. 
+We also utilize SVM to extract top $k$ candidate articles, but further adopt Bi-GRU and article-side attention module to better understand the texts and exploring the correlation among articles. 
 % However, to better understand the association between facts and articles, we use attention mechanism to distinguish relevant ones in the top $k$ extraction results. \orange{To make our model fully differenciable,} rather than using frequent pattern mining techinque, we use RNN to model the correlations among articles.
-More importantly, we optimize the article extraction task within our charge prediction framework,  which not only provides another view to understand the fact, but also serves as legal basis to support \orange{the final decision.}
+More importantly, we optimize the article extraction task within our charge prediction framework,  which not only provides another view to understand the facts, but also serves as legal basis to support the final decision.
 
-Another related thread of work in the field of artificial intelligence and law is to predict the overall outcome of a case. The target can be predicting which party will the outcome side with~\cite{aletras2016predicting}, or whether the present court will affirm or reverse the decision of a lower court~\cite{katz2016general}. Our work differs from them in that, instead of binary outcome (the latter one also contains an \emph{other} class), we step further to focus on the detailed results of a case, i.e., the charges, where the output may contain multiple labels. 
+Another related thread of work %in the field of artificial intelligence and law 
+is to predict the overall outcome of a case. The target can be 
+% predicting 
+which party will the outcome side with~\cite{aletras2016predicting}, or whether the present court will affirm or reverse the decision of a lower court~\cite{katz2016general}. Our work differs from them in that, instead of binary outcome (the latter one also contains an \emph{other} class), we step further to focus on the detailed results of a case, i.e., the charges, where the output may contain multiple labels. 
 
 % Another related thread of work is to predict the overall outcome of a case. The target can be predicting whether the outcome will side with the plaintiff or defendant~\cite{bruninghaus2003predicting,aletras2016predicting}, or will the present court affirm or reverse the decision of a lower court~\cite{martin2004competing,katz2016general}. Our work mainly differs from them in that, instead of binary outcome, we step further to focuse on the detailed results of the case, i.e., the charges, where the output may contain multiple labels. 
 
 
 We also share similar spirit with the legal question answering task~\cite{COLIEE14}, which aims at answering the yes/no questions in the Japanese legal bar exams, that we all believe that relevant law articles are important for decisions in the civil law system. 
 \orange{Different from ours}, this task requires participants to extract relevant Japanese Civil Code articles first, 
-which are then used to answer the questions. 
+and then use them to answer the yes/no questions. 
 The former phase is often treated as an information retrieval task, and the latter phase is considered as a textual entailment task~\cite{kim2014legal,carvalho2016lexical}. 
 % \cite{kim2014legal,kimconvolutional}.
 % Another thread of work also tries to answer the multiple-choice questions in the USA National Bar Exam \cite{FAWEI16,adebayoneural}. Since the United States mainly operates on common law system, where statutory laws are less important, the relevant article extraction phase is not employed in these works.
@@ -35,7 +39,7 @@ Recently, various neural network (NN) architectures such as Convolutional Neural
 \cite{tang2015document} proposes a two-layer scheme, RNN or CNN for sentence embedding, and another RNN for document embedding.
 %Our method also uses this two-layer scheme, and shares similar spirit with
 \cite{yang2016hierarchical} further uses global context vectors to attentively distinguish informative words or sentences from non-informative ones during embedding, which we share similar spirit with. 
-But, we take a more flexible and descriptive \orange{two-stack} attention mechanism, \orange{one stack} for fact embedding, and the other one for article embedding which is  dynamically generated for each instance according to the \orange{fact-side} clues as extra guidance.
+But, we take a more flexible and descriptive \orange{two-stack} attention mechanism, \orange{one stack} for fact embedding, and the other one for article embedding which is  dynamically generated for each instance according to the fact-side clues as extra guidance.
 % We also differs from these works in using extracted relevant law articles to support charge classification, which require us to distinguish relevant articles from irrelevant ones, and further aggregate the information from two sources for classification.
 %
 Another difference is the multi-label nature of our task, where, rather than optimizing as multiple binary classification tasks~\cite{nam2014large}, 

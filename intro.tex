@@ -26,7 +26,7 @@ or just \textit{intended to hurt the victim, who, unfortunately, died of his sev
 % and \emph{acceptance of bribes} differs from \emph{acceptance of bribes by a non-state functionary} in the occupation of the defendant. 
 (2) Multiple crimes may be involved in a single case, which means that we need to conduct charge prediction in the multi-label classification paradigm. 
 (3) Although we can expect an off-the-shelf classification model to learn to label a case with corresponding charges % certain judgement tags %  implicitly learn the legal basis of the judgement 
-through massive training data,  it is always more convincing to make the prediction with its involved law articles explicitly shown to the users, as \orange{certain} legal basis to support the prediction. % judgement.  
+through massive training data,  it is always more convincing to make the prediction with its involved law articles explicitly shown to the users, as certain legal basis to support the prediction. % judgement.  
 %the predicted charges are still not convincing enough if no law articles are involved in the prediction. 
 This issue is of great importance in countries using \textit{the civil law system}, e.g., China (except Hong Kong) and Germany, where the judgement is made based on statutory laws only. 
 For example, in Figure \ref{fig_example_case}, a judgement document in China always includes relevant law articles (usually in the court view part) to support the final decision.  
@@ -36,11 +36,11 @@ Even in countries using \textit{the common law system}, e.g., the United States 
 
 Existing attempts formulate the task of automatic charge prediction as a single-label classification problem, 
 by either adopting a k-Nearest Neighbor (KNN)~\cite{LIU2004case,liu2006exploring} as the classifier 
-with \orange{simple textual features},
+with shallow textual features,
 % \orange{with carefully selected feature templates}, 
 % or manually designing rules to identify key factors \red{to recognize} specific charges~\cite{lin2012exploiting}, 
 or manually designing key factors for specific charges to help text understanding~\cite{lin2012exploiting},
-which make those works unable to scale to more types of charges. 
+which make those works hard to scale to more types of charges. 
 %Previous works on charge prediction either use k-Nearest Neighbor (KNN)~\cite{LIU2004case,liu2006exploring} as classifier or need to manually design key factors of specific charges \cite{lin2012exploiting}, thus do not scale well with regard to data size and number of charges. Furthermore, none of them consider the situation where multiple charges are involved. 
 There are also works addressing a related task, finding the law articles that are involved in a given case.
 % There are also works addressing a related task, finding specific law articles that has been violated in a 
@@ -76,11 +76,11 @@ article extraction in a unified framework, %which enables them to influence each
 where the latent correspondence from the fact descriptions about a case to its related law articles 
 and further to its charges can be explicitly addressed by a \orange{two-stack attention} mechanism.
 Specifically,   %to understand the \orange{whole framework} of the facts, inspired by previous works on document classification \cite{tang2015document,yang2016hierarchical}, 
-we use a sentence-level and a document-level Bi-directional Gated Recurrent Units (Bi-GRU)~\cite{bahdanau2015neural} \orange{with a stack of fact-side attention modules} to model the associations among words and sentences, in order to capture \orange{the whole story as well as important details of the case}.  
+we use a sentence-level and a document-level Bi-directional Gated Recurrent Units (Bi-GRU)~\cite{bahdanau2015neural} \orange{with a stack of fact-side attention components} to model the correlations among words and sentences, in order to capture \orange{the whole story as well as important details of the case}.  
 %To capture the important details, we use attention mechanism to select the most informative words or sentences for sentence and document embedding respectively. 
 %To handle the multi-label nature of the problem, we convert the multi-label target to label distribution, and then use cross entropy as loss function. 
 % We find this method works well in our experiments and significantly outperforms the baseline BOW method.
-Given the analysis about the fact descriptions, we accordingly learn \orange{a stack of article-side attention modules} to attentively select the most supportive law articles from the statutory laws  to support our charge prediction, which is investigated in a multi-label paradigm.
+Given the analysis of the fact descriptions, we accordingly learn \orange{a stack of article-side attention components} to attentively select the most supportive law articles from the statutory laws  to support our charge prediction, which is investigated in a multi-label paradigm.
 %we first use a simple BOW-based article classifier to quickly \orange{filter out most of the irrelevant articles}. 
 %Then we attentively aggregate the retained top $k$ articles for further charge classification.
 % Although the top $k$ articles are noisy, the experimental results show that our attentive aggregation module can further attend to relevant ones and thus improve the prediction performance. 
@@ -93,13 +93,14 @@ from which we can automatically extract
 \textit{fact descriptions}, \textit{relevant law articles} and \textit{the charges} using simple rules, as shown in Figure~\ref{fig_example_case}.
 %, we use rules and regular expressions to extract these information and build a dataset accordingly. 
 Experimental results show that our neural network method can effectively predict appropriate charges for a given case, and also provide relevant law articles as legal basis to support the prediction. 
-\orange{We also quantitively discuss the contribution of fact-side and article-side information for charge predicion by comparing different variants of our model.} 
-Our experiments also confirm that, apart from providing legal basis, relevant articles also contain \orange{useful information} that can help to improve charge prediction in \orange{the civil law system}.
+Our experiments also provide quantitive analysis on the effect of fact-side and article-side information for charge predicion, 
+and confirm that, apart from providing legal basis, relevant articles also contain useful information that can help to improve charge prediction in the civil law system.
+% Our experiments also confirm that, apart from providing legal basis, relevant articles also contain \orange{useful information} that can help to improve charge prediction in \orange{the civil law system}.
 %Furthermore, since there exist differences between the words used by laymen and legal practitioners, 
-We also examine our model on the news reports about criminal cases composed by journalists.
+We also examine our model on the news reports about criminal cases. % composed by journalists.
 %and the results show that, 
 Although trained on judgement documents, our model can still 
-\orange{achieve promising performance on news data, showing a reasonable generalization ability over different expression styles.} 
+achieve promising performance on news data, showing a reasonable generalization ability over different expression styles.
 % \red{achieve a F1 score of 79.12\% on news data,  with 20\% less performance drop compared to baselines,
 % (Just say, achieve promising performance???)
 % showing a better generalization ability in more diverse situations. 
@@ -126,4 +127,6 @@ Rectangulars, ellipses and dashed rectangulars refer to the clauses that usually
 }
 \label{fig_example_case}
 \end{center}
+\vspace{-.5em}
 \end{figure*}
+

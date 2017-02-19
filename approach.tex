@@ -1,11 +1,5 @@
 
-\begin{figure}[t!]
-\begin{center}
-\includegraphics[width=0.48\textwidth]{figures/charge_pred_overview.png}	
-\caption{Overview of Our Model}
-\label{fig_model_framework}
-\end{center}
-\end{figure}
+
 
 \section{Our Approach}
 % In order to generate reasonable charge prediction, 
@@ -14,6 +8,17 @@ As depicted in Fig.~\ref{fig_model_framework}, our approach contains the followi
 (2) Concurrently, the fact description is also passed to an article extractor to find top $k$ relevant law articles. 
 (3) These articles are embedded by another document encoder, and  passed to an article aggregator to attentively select supportive articles, and produce the aggregated article embedding $\mathbf{d}_a$. Specifically, three context vectors, i.e., $\mathbf{u}_{aw}$, $\mathbf{u}_{as}$ and $\mathbf{u}_{ad}$ are dynamically generated from $\mathbf{d}_f$, to enhance the article document encoder and the article aggregator. 
 (4) Finally, $\mathbf{d}_f$ and $\mathbf{d}_a$ are concatenated and passed to a softmax classifier to predict the charge distribution for the input case.
+
+
+\begin{figure}[t!]
+\begin{center}
+\includegraphics[width=0.48\textwidth]{figures/charge_pred_overview.png}	
+\caption{Overview of Our Model}
+\label{fig_model_framework}
+\end{center}
+\vspace{-1em}
+\end{figure}
+% \vspace{-1.5em}
 
 %The fact-based charge classification task can be formatted as a multi-label document classification task. The input is several sentences describing the facts of a case, and the output is multiple charges related to the case. Since usually multiple elements are required to constitute a charge (for example, the charge of acceptance of bribes requires the defendant to illegally accepts another person's money, and the defendant should also be a state functionary), the recurrent neural network (RNN) seems like a natural fit for the task. Considering the fact that only a small portion of the facts are crucial for the determination of charges, we also use attention mechanism in our model. Since the HAN model  satisfies many of our requirements except the multi-label classification capability, we use the framework of the HAN model for document embedding, but replace the output module and the loss function with ones that are compatible with the multi-label classification task. Furthermore, to take the information of article into account, we add another article attention module to incorporate the information of relevant articles to the model.
 
@@ -28,8 +33,9 @@ encoder to produce the document embedding~$\mathbf{d}$.
 % Although it is possible to use different architectures for these two encoders, we use the same here for simplicity.
 While these two encoders can have different architectures, we use the same here for simplicity.
 
-\vspace{-.5em}
+
 \begin{figure}[htbp]
+\vspace{-.5em}
 \begin{center}
 \includegraphics[width=0.4\textwidth]{figures/document_encoder.png}	
 \caption{Document Encoder Framework}
@@ -37,18 +43,21 @@ While these two encoders can have different architectures, we use the same here 
 \end{center}
 \end{figure}
 %
-\vspace{-.5em}
+
 \begin{figure}[htbp]
+\vspace{-1em}
 \begin{center}
 \includegraphics[width=0.45\textwidth]{figures/attentive_seq_encoder.png}	
 \caption{Attentive Sequence Encoder}
 \label{fig_seq_encoder}
 \end{center}
+\vspace{-1.5em}
 \end{figure}
+% \vspace{-1.5em}
 
 
 \paragraph{Bi-GRU Sequence Encoder} 
-A challenge in building a sequence encoder is how to take the \orange{correlation} among different elements into consideration. A promising solution is the Bi-directional Gated Recurrent Units (Bi-GRU) model~\cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
+A challenge in building a sequence encoder is how to take the correlation among different elements into consideration. A promising solution is the Bi-directional Gated Recurrent Units (Bi-GRU) model~\cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
 Specifically, Bi-GRU first uses a forward and a backward GRU~\cite{cho2014learning}, which is a kind of RNN, to encode the sequence in two opposite directions, and then concatenate the states of both GRUs to form its own states. 
 
 Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathbf{x}_t$ is the input embedding of element $t$, the state of Bi-GRU at position $t$ is:
@@ -57,7 +66,7 @@ Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathb
 %h_t = [\overrightarrow{h}_t , \overleftarrow{h}_t]
 \mathbf{h}_t = [\mathbf{h}_{ft}, \mathbf{h}_{bt}]
 \end{equation}
-where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the states of the forward and backward GRU at position $t$, respectively. 
+where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the states of the forward and backward GRU at position $t$. %, respectively. 
 The final sequence embedding is either the concatenation of $\mathbf{h}_{fT}$ and $\mathbf{h}_{b1}$
 % i.e., $[\mathbf{h}_{fT}, \mathbf{h}_{b1}]$, 
 or simply the average of $\mathbf{h}_t$.
@@ -82,9 +91,10 @@ or simply the average of $\mathbf{h}_t$.
 
 \paragraph{Attentive Sequence Encoder}
 \label{sec_att_seq_encoder}
-However, $[\mathbf{h}_{fT}, \mathbf{h}_{b1}]$ often fails to capture \red{all the/detailed/local} information when the sequence is long, while using the average of $\mathbf{h}_t$ also has the drawback that it treats useless elements equally with informative ones. 
+However, $[\mathbf{h}_{fT}, \mathbf{h}_{b1}]$ often fails to capture all the %/detailed/local} 
+information when the sequence is long, while using the average of $\mathbf{h}_t$ also has the drawback of treating useless elements equally with informative ones. 
 %
-Inspired by \cite{yang2016hierarchical}, we use a context vector to attentively aggregate the elements, but instead of using a global context vector, we further allow the context vector to be dynamically generated when extra guidance is available (see Sect.~\ref{sec_article_encoder}).
+Inspired by \cite{yang2016hierarchical}, we use a context vector to attentively aggregate the elements, but instead of using a global context vector, we further allow the context vector to be dynamically generated when extra guidance is available (see Sec.~\ref{sec_article_encoder}).
 
 
 %The framework of our attentive sequence encoder is 
@@ -113,14 +123,16 @@ where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final embedding of the
 \end{equation}
 where $\mathbf{W}$ is a weight matrix, and $\mathbf{u}$ is the context vector to distinguish informative elements from non-informative ones. 
 
-By using this sequence encoder for fact embedding, the fact-side attention module actually contains two components, i.e., the word-level and sentence-level, using $\mathbf{u}_{fw}$ and $\mathbf{u}_{fs}$ as \red{their/global} context vectors, respectively.
+By using this sequence encoder for fact embedding, the fact-side attention module actually contains two components, i.e., the word-level and sentence-level, using $\mathbf{u}_{fw}$ and $\mathbf{u}_{fs}$ as their global context vectors, respectively.
 
 
 \subsection{Using Law Articles} 
-One of the key challenges of utilizing law articles to support our charge prediction lies in the fact that statutory laws contain a large number of law articles and there are usually multiple articles involved in one case, \red{which require complex classification models, time-consuming and hard to generalize.} %in both training and predicting, and run slowly in \orange{production environment} as well. 
+One of the challenges of using law articles to support charge prediction lies in the fact that statutory laws contain a large number of articles, which makes applying complex models to these articles directly time-consuming, and thus hard to scale.
+The multi-label nature of relevant article extraction also requires a model that can output multiple articles.
+% and there are usually multiple articles involved in one case, \red{which require complex classification models, time-consuming and hard to generalize.} %in both training and predicting, and run slowly in \orange{production environment} as well. 
 %
 We thus adopt a two-step approach, % to resolve this problem. 
-specifically, we first build a fast and easy-to-scale classifier to filter out a large fraction of irrelevant articles, and retain the top $k$ articles. Then, we use neural networks to make comprehensive understanding of the top $k$ articles, and further benefit from the article-side attention module to select the most supportive ones for charge classification.
+specifically, we first build a fast and easy-to-scale classifier to filter out a large fraction of irrelevant articles, and retain the top $k$ articles. Then, we use neural networks to make comprehensive understanding of the top $k$ articles, and further use the article-side attention module to select the most supportive ones for charge prediction.
 
 \paragraph{Top $k$ Article Extractor}
 \label{sec_article_extractor}
@@ -132,9 +144,10 @@ When more articles are considered,
 % (e.g. articles in the Anti-Drug Law of the People's Republic of China), 
 we can simply add more binary classifiers accordingly, with the existing classifiers untouched.
 
-We use word-based SVM as our binary classifier, which is fast and performs well in text classification~\cite{joachims2002learning,wang2012baselines}. Specifically, we use bag-of-words TF-IDF features, chi-square for feature selection and linear kernel for binary classification. 
-\red{Although the output scores by different classifiers may be not be compared directly, 
-we consider them as a kind of confidence  and keep the top $k$ articles with the highest confidence.}% are retained for each judgement document.
+\orange{Similar to the preliminary classification phase of \cite{liu2015predicting},}
+we also use word-based SVM as our binary classifier, which is fast and performs well in text classification~\cite{joachims2002learning,wang2012baselines}. Specifically, we use bag-of-words TF-IDF features, chi-square for feature selection and linear kernel for binary classification. 
+% \red{Although the output scores by different classifiers may be not be compared directly, 
+% we consider them as a kind of confidence  and keep the top $k$ articles with the highest confidence.}% are retained for each judgement document.
 
 
 \paragraph{Article Encoder}
@@ -155,17 +168,19 @@ Through the dynamic context vectors, the fact embedding $\mathbf{d}_f$ actually 
 
 \paragraph{Attentive Article Aggregator}
 % The article aggregator aims to generate an aggregated embedding for the top $k$ articles. Since not all the articles are relevant, the difficulty here is how to distinguish relevant articles from irrelevant ones.
-The article aggregator aims to find supportive articles for charge prediction from the top $k$ extraction, and accordingly produce an aggregated article embedding.
+The article aggregator aims to find supportive articles for charge prediction from the top $k$ extractions, and accordingly produce an aggregated article embedding.
 % generate an aggregated embedding for the top $k$ articles
 %
 % attend more to relevant articles while trying to ignore the irrelevant ones. 
 %
 % Due to the inferior classification ability of the relevant article extractor, the order of the top $k$ articles are not \orange{very meaningful}. Therefore, the top $k$ articles are more of a set than a sequence. 
 %Due to the unreliability of the order of the top $k$ articles, these articles are more of a set than a sequence.
-\red{ Although the top $k$ extracted articles are more like a set, rather than a sequence, }
+% 
+% \orange{Although the top $k$ extracted articles are more like a set, rather than a sequence, }
 %However, as suggested by \cite{vinyals2016matching}, when encoding a set, 
-\red{it is still beneficial to embed the context of each element using a bidirectional RNN\cite{vinyals2016matching}.}
-In our task, bi-directional RNN may help capture the co-occurrence of relevant articles.
+% \orange{\cite{vinyals2016matching} suggests it is still beneficial to embed the context of each element in the set using a bi-directional RNN.}
+\orange{Although the order of the top $k$ extracted articles is not fully reliable, \cite{vinyals2016matching} suggests it is still beneficial to embed the context of each element in a set, where the order does not even exist, using a bi-directional RNN.}
+In our task, bi-directional RNN may help to capture the co-occurrence of relevant articles.
 
 Specifically, we use the attentive sequence encoder in Sec.~\ref{sec_att_seq_encoder} 
 to produce the aggregated article embedding $\mathbf{d}_a$. 
@@ -179,7 +194,7 @@ Again, to guide the attention with fact descriptions, we dynamically generate th
 \subsection{The Output}
 To make the final charge prediction, we first concatenate the document embedding $\mathbf{d}_f$ and the aggregated article embedding $\mathbf{d}_a$, and feed them to two consecutive full connection layers to generate a new vector $\mathbf{d}'$, which is then passed to a softmax classifier to produce the predicted charge distribution. We use the validation set to determine a threshold $\tau$, and consider all the charges with output probability higher than $\tau$ as positive predictions.
 % Note that although other multi-label classification paradigms are also applicable to our problem (see Section \ref{sec_related_work}), we use this method because it performs best in our pilot experiments. 
-The input to the first full connection layer can also be \red{either $\mathbf{d}_f$, or $\mathbf{d}_a$ only, which means we can use either fact or article only to make the prediction}.
+The input to the first full connection layer can also be either $\mathbf{d}_f$, or $\mathbf{d}_a$ only, which means we can use either fact or article only to make the prediction.
 % (see comparison in Section \ref{sec_main_results}). 
 
 As for training, we use cross entropy as our loss function:
@@ -187,12 +202,12 @@ As for training, we use cross entropy as our loss function:
 \label{original_loss}
 Loss= -\sum_{i=1}^N\sum_{l=1}^L{y_{il} log(o_{il})}
 \end{equation} 
-where $N$ is the number of training data, $L$ the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ \red{for case} $i$. The target charge distribution $\mathbf{y}$ is produced by setting positive labels to $\frac{1}{m}$ and negative labels to $0$, where $m$ is the number of positive labels for the current case.
+where $N$ is the number of training data, $L$ the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ for case $i$. The target charge distribution $\mathbf{y}_i$ is produced by setting positive labels to $\frac{1}{m_i}$ and negative labels to $0$, where $m_i$ is the number of positive labels for case $i$.
 
 \paragraph{Supervised Article Attention}
 %Since the judgement documents also contain gold standard relevant law articles, 
-we can also utilize the gold-standard law articles naturally in the judgement documents
-to \orange{supervise} the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold-standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold-standard articles in the top $k$ extractions.
+We can also utilize the gold-standard law articles naturally in the judgement documents
+to supervise the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold-standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold-standard articles in the top $k$ extractions.
 %
 % : \todo{can be simplified}
 % \begin{equation}
