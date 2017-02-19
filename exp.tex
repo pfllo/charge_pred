@@ -55,10 +55,9 @@ We compare our full model with two variations: without article attention supervi
 % \hline
 \end{tabular}
 }
-\vspace{-.5em}
+% \vspace{-.5em}
 \caption{Charge prediction results. $^*$ refers to using gold standard articles during training and testing. Left and right side of the slash refer to micro- and macro-statistics, respectively.}
 \label{tabble_main_results}
-\vspace{-0.5em}
 \end{table}
 
 
@@ -80,7 +79,7 @@ each charge, and the micro- ones are averaged  over each prediction. %In other w
 As shown in Table~\ref{tabble_main_results}, %we can see that, 
 the basic \texttt{SVM} model,
 which only takes fact descriptions as input, indeed proves to be a strong baseline.
-By contrast, our \red{corresponding} neural network model (\texttt{NN}), which also only uses facts for prediction, outperforms \texttt{SVM} 
+By contrast, our corresponding neural network model (\texttt{NN}), which also only uses facts for prediction, outperforms \texttt{SVM} 
 by around 4\% in micro-F1.
 Since \texttt{NN} benefits from the pre-trained word embeddings,
 a two-level Bi-GRU architecture, and the fact-side attention module,
@@ -120,7 +119,7 @@ to some extent, may be implicitly captured through massive fact-charges paris.
 
 
 
-\red{Now the question is: \textit{how much improvement can we have by 
+\orange{Now the question is: \textit{how much improvement can we have by 
 making full use of %expoiting 
 the relevant law articles within the civil law system?}}
 % \orange{Now the question is: \textit{what is the upper bound of the improvements that can be made by using relevant law articles within the civil law system?}}
@@ -246,7 +245,6 @@ However, the micro F1 of the extractor is only 61.08\% in the test set, which wi
 }
 \caption{Refined Article Extraction Performance}
 \label{tab_article_att}
-\vspace{-0.5em}
 \end{table}
 
 
@@ -278,14 +276,13 @@ However, the charge prediction performance does not always increase with the art
 }
 \caption{Performance (micro- statistics) on News Data}
 \label{tabble_news_results}
-\vspace{-0.5em}
 \end{table}
 
 \subsection{Performance on News Data}
 There are usually 
 clear %significant 
 differences between the expressions used by legal practitioners and people without legal background, 
-thus it is important to see how our model will perform on fact descriptions \orange{written} by non-legal professionals.
+thus it is important to see how our model will perform on fact descriptions written by non-legal professionals.
 %
 %We evaluate our models  on news reports that are composed by general reporters,
 %where 
@@ -293,14 +290,17 @@ We then manually annotate 100 news reports %by general reporters
 from two news websites\footnote{\url{news.cn/legal} and \url{legal.people.com.cn}},
 containing 262 words on average and 25 distinct charges.
 %
-The results are shown in Table \ref{tabble_news_results}, where we only report micro statistics \orange{due to the small size of the dataset.}
+The results are shown in Table \ref{tabble_news_results}, where we only report micro statistics due to the small size of the dataset.
+% since macro ones are not 
+
 %Also note that the size of the news test set is relatively small with regard to the number of charges, which results in less reliable macro statistics, we therefore only report  here.
 
 We can see that, \texttt{SVM} suffers a significant drop in F1 on the news data, %compared to on judgement documents,
 confirming the gap between the expressions used by legal practitioners and non-legal professionals,
 given the BOW nature of \texttt{SVM}.
 Although \texttt{SVM} cannot generalizes well, the patterns learned by \texttt{SVM} are reliable in themselves, leading to a high precision.
-It is not surprising that our NN models also suffer from the \orange{news genre}, but with about 10\%$\sim$15\% less absolute drop in F1, and our  \texttt{NN\_supv\_article} can still achieve 79.12\% in F1, \orange{thanks to our NN architectures}.
+It is not surprising that our NN models also suffer from the expression differences, %\orange{news genre}, 
+but due to the effectiveness of our NN architecture, with about 10\%$\sim$15\% less absolute drop in F1, and \texttt{NN\_supv\_article} can still achieve 79.12\% in F1. %, \orange{thanks to our NN architectures}.
 %exists a performance drop, they are much better than the SVM model. This shows that the  gap in expressions can be resolved by using embedding methods to a some extent. 
 For example, the word 暴打$\ $(beat up) is seldom used in judgement documents,
 making it hard for \texttt{SVM} to correctly utilize  暴打$\ $as an indicator for injury related charges, but, %However, by using pre-trained word embeddings, 

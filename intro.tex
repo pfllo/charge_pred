@@ -76,7 +76,7 @@ article extraction in a unified framework, %which enables them to influence each
 where the latent correspondence from the fact descriptions about a case to its related law articles 
 and further to its charges can be explicitly addressed by a \orange{two-stack attention} mechanism.
 Specifically,   %to understand the \orange{whole framework} of the facts, inspired by previous works on document classification \cite{tang2015document,yang2016hierarchical}, 
-we use a sentence-level and a document-level Bi-directional Gated Recurrent Units (Bi-GRU)~\cite{bahdanau2015neural} \orange{with a stack of fact-side attention components} to model the correlations among words and sentences, in order to capture \orange{the whole story as well as important details of the case}.  
+we use a sentence-level and a document-level Bi-directional Gated Recurrent Units (Bi-GRU)~\cite{bahdanau2015neural} \orange{with a stack of fact-side attention components} to model the correlations among words and sentences, in order to capture the whole story as well as important details of the case. 
 %To capture the important details, we use attention mechanism to select the most informative words or sentences for sentence and document embedding respectively. 
 %To handle the multi-label nature of the problem, we convert the multi-label target to label distribution, and then use cross entropy as loss function. 
 % We find this method works well in our experiments and significantly outperforms the baseline BOW method.
