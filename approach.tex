@@ -9,21 +9,25 @@
 
 \section{Our Approach}
 % In order to generate reasonable charge prediction, 
-Our approach follows four steps as depicted in Figure \ref{fig_model_framework}. 
+As depicted in Fig.~\ref{fig_model_framework}, our approach contains the following steps . 
 (1) The input fact description is fed to a document encoder to generate the fact embedding $\mathbf{d}_f$, where $\mathbf{u}_{fw}$ and $\mathbf{u}_{fs}$ are global word-level and sentence-level context vectors used to attentively select informative words and sentences.
 (2) Concurrently, the fact description is also passed to an article extractor to find top $k$ relevant law articles. 
-(3) These articles are fed to another document encoder, and the resultant article embeddings are passed to an article aggregator to attentively select supportive articles, and produce the aggregated article embedding $\mathbf{d}_a$. Meanwhile, three context vectors, i.e., $\mathbf{u}_{aw}$, $\mathbf{u}_{as}$ and $\mathbf{u}_{ad}$, are dynamically generated from $\mathbf{d}_f$ for the article document encoder and the article aggregator. 
+(3) These articles are embedded by another document encoder, and  passed to an article aggregator to attentively select supportive articles, and produce the aggregated article embedding $\mathbf{d}_a$. Specifically, three context vectors, i.e., $\mathbf{u}_{aw}$, $\mathbf{u}_{as}$ and $\mathbf{u}_{ad}$ are dynamically generated from $\mathbf{d}_f$, to enhance the article document encoder and the article aggregator. 
 (4) Finally, $\mathbf{d}_f$ and $\mathbf{d}_a$ are concatenated and passed to a softmax classifier to predict the charge distribution for the input case.
 
 %The fact-based charge classification task can be formatted as a multi-label document classification task. The input is several sentences describing the facts of a case, and the output is multiple charges related to the case. Since usually multiple elements are required to constitute a charge (for example, the charge of acceptance of bribes requires the defendant to illegally accepts another person's money, and the defendant should also be a state functionary), the recurrent neural network (RNN) seems like a natural fit for the task. Considering the fact that only a small portion of the facts are crucial for the determination of charges, we also use attention mechanism in our model. Since the HAN model  satisfies many of our requirements except the multi-label classification capability, we use the framework of the HAN model for document embedding, but replace the output module and the loss function with ones that are compatible with the multi-label classification task. Furthermore, to take the information of article into account, we add another article attention module to incorporate the information of relevant articles to the model.
 
 \subsection{Document Encoder}
 \label{sec_doc_encoder}
-% Our document encoder module is based on the framework of Hierarchical Neural Network (HAN) proposed by \cite{yang2016hierarchical}. The overview of our document encoder is shown in Figure \ref{fig_doc_encoder}. 
-Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. As suggested by \cite{tang2015document,yang2016hierarchical}, the document embedding problem can be converted to two sequence embedding problems. As shown in Figure \ref{fig_doc_encoder}, we can first embed each sentence using a sentence-level sequence encoder, and then aggregate them with a document-level sequence encoder to generate the document embedding $\mathbf{d}$. 
+% Our document encoder module is based on the framework of Hierarchical Neural Network (HAN) proposed by \cite{yang2016hierarchical}. The overview of our document encoder is shown in Fig.~\ref{fig_doc_encoder}. 
+Intuitively, a sentence is a sequence of words and a document is a sequence of sentences. %As suggested by , 
+The document embedding problem, therefore, can be converted to two sequence embedding problems \cite{tang2015document,yang2016hierarchical}. As shown in Fig.~\ref{fig_doc_encoder}, we can first embed each 
+sentence using a sentence-level sequence encoder, and then aggregate them with a document-level sequence 
+encoder to produce the document embedding~$\mathbf{d}$. 
 % Therefore, the key problem of document embedding converts to building an effective sequence encoder.
-Although it is possible to use different models for these two sequence encoders, we use the same architecture here for simplicity.
+Although it is possible to use different architectures for these two encoders, we use the same here for simplicity.
 
+\vspace{-.5em}
 \begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=0.4\textwidth]{figures/document_encoder.png}	
@@ -31,7 +35,8 @@ Although it is possible to use different models for these two sequence encoders,
 \label{fig_doc_encoder}
 \end{center}
 \end{figure}
-
+%
+\vspace{-.5em}
 \begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=0.45\textwidth]{figures/attentive_seq_encoder.png}	
@@ -42,17 +47,16 @@ Although it is possible to use different models for these two sequence encoders,
 
 
 \paragraph{Bi-GRU Sequence Encoder} 
-A challenge in building a sequence encoder is how to take the correlation of each elements into consideration. A promising solution is the Bi-GRU model proposed by \cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
-Specifically, Bi-GRU first uses a forward and a backward GRU~\cite{cho2014learning}, which is a kind of Recurrent Neural Network (RNN), to encode the sequence in two opposite directions, and then concatenate the states of both GRUs to form its own states. 
+A challenge in building a sequence encoder is how to take \red{the correlation among different  elements} into consideration. A promising solution is the Bi-directional Gated Recurrent Units (Bi-GRU) model~\cite{bahdanau2015neural}, which encodes the context of each element by using a gating mechanism to track the state of sequence.
+Specifically, Bi-GRU first uses a forward and a backward GRU~\cite{cho2014learning}, which is a kind of RNN, to encode the sequence in two opposite directions, and then concatenate the states of both GRUs to form its own states. 
 
 Given a sequence $[\mathbf{x}_1, \mathbf{x}_2, ..., \mathbf{x}_T]$ where $\mathbf{x}_t$ is the input embedding of element $t$, the state of Bi-GRU at position $t$ is:
-
+%
 \begin{equation}
 %h_t = [\overrightarrow{h}_t , \overleftarrow{h}_t]
 \mathbf{h}_t = [\mathbf{h}_{ft}, \mathbf{h}_{bt}]
 \end{equation}
-where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the states of the forward and backward GRU at position $t$.
-% respectively. 
+where $\mathbf{h}_{ft}$ and $\mathbf{h}_{bt}$ are the states of the forward and backward GRU at position $t$, respectively. 
 The final sequence embedding is either the concatenation of $\mathbf{h}_{fT}$ and $\mathbf{h}_{b1}$
 % i.e., $[\mathbf{h}_{fT}, \mathbf{h}_{b1}]$, 
 or simply the average of $\mathbf{h}_t$.
@@ -77,12 +81,15 @@ or simply the average of $\mathbf{h}_t$.
 
 \paragraph{Attentive Sequence Encoder}
 \label{sec_att_seq_encoder}
-However, $[\mathbf{h}_{fT}, \mathbf{h}_{b1}]$ often fails to capture all the information when the sequence is long, and using the average of $\mathbf{h}_t$ also has the drawback that it treats useless elements equally with informative ones. 
+However, $[\mathbf{h}_{fT}, \mathbf{h}_{b1}]$ often fails to capture \red{all the/detailed/local} information when the sequence is long, while using the average of $\mathbf{h}_t$ also has the drawback that it treats useless elements equally with informative ones. 
+%
+Inspired by \cite{yang2016hierarchical}, we use a context vector to attentively aggregate the elements, but instead of using a global context vector, we further allow the context vector to be dynamically generated when extra guidance is available (see Sect.~\ref{sec_article_encoder}).
 
-Inspired by \cite{yang2016hierarchical}, we also use a context vector to attentively aggregate the elements, but instead of using a global context vector, we further allow it to be dynamically generated when extra guidance is available (see Section \ref{sec_article_encoder}).
 
-
-The framework of our attentive sequence encoder is show in Figure \ref{fig_seq_encoder}. Given the Bi-GRU state sequence $[\mathbf{h}_1, \mathbf{h}_2, ..., \mathbf{h}_T]$, we calculate a sequence of attention values $[\alpha_1, \alpha_2, ..., \alpha_T]$ where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final embedding of the sequence $\mathbf{g}$ is then calculated by:
+%The framework of our attentive sequence encoder is 
+As shown in Fig.~\ref{fig_seq_encoder}, given the Bi-GRU state sequence $[\mathbf{h}_1, \mathbf{h}_2, ..., \mathbf{h}_T]$, 
+our attentive sequence encoder calculate a sequence of attention values $[\alpha_1, \alpha_2, ..., \alpha_T]$, 
+where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final embedding of the sequence $\mathbf{g}$ is then calculated by:
 % \begin{equation}
 % \mathbf{g} = \sum_{t=1}^{T}{\alpha_t \mathbf{h}_t}
 % \label{seq_embed}
@@ -105,13 +112,14 @@ The framework of our attentive sequence encoder is show in Figure \ref{fig_seq_e
 \end{equation}
 where $\mathbf{W}$ is a weight matrix, and $\mathbf{u}$ is the context vector to distinguish informative elements from non-informative ones. 
 
-\orange{By using this sequence encoder for fact embedding, the fact-side attention module stack actually contains two components, i.e., the word-level and sentence-level attention modules using $\mathbf{u}_{fw}$ and $\mathbf{u}_{fs}$ as global context vectors respectively.}
+By using this sequence encoder for fact embedding, the fact-side attention module actually contains two components, i.e., the word-level and sentence-level, using $\mathbf{u}_{fw}$ and $\mathbf{u}_{fs}$ as \red{their/global} context vectors, respectively.
 
 
-\subsection{Using Law Articles}
-One of the difficulties of using law articles to support our charge prediction lies in the fact that statutory laws contain a large number of law articles, which makes complex classification models time-consuming in training, and run slowly in \orange{production environment} as well. 
+\subsection{Using Law Articles} 
+One of the challenges of utilizing law articles to support our charge prediction lies in the fact that statutory laws contain a large number of law articles and there are usually multiple articles involved in one case, \red{which require complex classification models, time-consuming in both training and predicting.} %, and run slowly in \orange{production environment} as well. 
 
-We use a two-step approach to resolve this problem. Specifically, at the first step, we use a fast and easy-to-scale classifier to filter out a large fraction of irrelevant articles, and retain the top $k$ articles for the next step. Then, we use neural network to make conprehensive understanding of the top $k$ articles, and then use the \orange{article-side attention module stack to select the most supportive ones for charge classification.}
+We thus adopt a two-step approach.% to resolve this problem. 
+Specifically, at the first step, we use a fast and easy-to-scale classifier to filter out a large fraction of irrelevant articles, and retain the top $k$ articles for the next step. Then, we use neural network to make conprehensive understanding of the top $k$ articles, and then use the \orange{article-side attention module stack to select the most supportive ones for charge classification.}
 
 \paragraph{Top $k$ Article Extractor}
 \label{sec_article_extractor}
@@ -123,7 +131,7 @@ We use bag-of-words-based SVM as our binary classifier, which is fast and perfor
 
 \paragraph{Article Encoder}
 \label{sec_article_encoder}
-Since each law article may contain multiple sentences, as shown in Figure \ref{fig_model_framework}, we also use the document encoder described in Section \ref{sec_doc_encoder} to generate the article embedding $\mathbf{a}_j, j\in [1, k]$ for the top $k$ articles. 
+Since each law article may contain multiple sentences, as shown in Fig.~\ref{fig_model_framework}, we also use the document encoder described in Section \ref{sec_doc_encoder} to generate the article embedding $\mathbf{a}_j, j\in [1, k]$ for the top $k$ articles. 
 While using similar architecure, this document encoder differs from the one used for fact embedding that, instead of using global context vectors, its word-level context vector $\mathbf{u}_{aw}$ and sentence-level context vector $\mathbf{u}_{as}$ are generated dynamically for each case from the fact embedding $\mathbf{d}_f$:
 \begin{equation}
 \mathbf{u}_{aw} = \mathbf{W}_w \mathbf{d}_f + \mathbf{b}_w;\ \ \ \ \mathbf{u}_{as} = \mathbf{W}_s \mathbf{d}_f + \mathbf{b}_s
