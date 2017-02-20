@@ -1,13 +1,12 @@
 \begin{abstract}
-The task of charge prediction aims at determining appropriate charges for a given case, which is helpful for legal assistant systems where the user input is fact description.
-We argue that relevant law articles play an important role in this task, and therefore propose 
-an attention-based neural network model 
+% The charge prediction task is to determine appropriate charges for a case based on fact description, which is helpful for legal assistant systems targeting non-legal professionals.
+The charge prediction task is to determine appropriate charges for a given case, which is helpful for legal assistant systems where the user input is fact description.
+We argue that relevant law articles play an important role in this task, and therefore propose an attention-based neural network method to jointly model the charge prediction task and the relevant article extraction task in a unified framework.
+The experimental results on judgement documents of criminal cases in China show that our model can effectively predict appropriate charges for the given case, and besides providing legal basis, the relevant articles can also clearly improve the charge prediction results. 
+Although trained on judgement documents, our model can also generalize to news reports and produces promising results.
 % a two-stack attention mechanism
-to jointly model the charge prediction task and the relevant article extraction task in a unified framework.
 % , where the weighted relevant articles can serve as legal basis to support the charge prediction.
 % utilize the fact descriptions and the automatically extracted law articles for this charge prediction task, and the ranked relevant law articles can also provide legal basis for the prediction. 
-The experimental results on judgement documents of Chinese criminal cases show that our model can effectively predict appropriate charges for the given case, and besides providing legal basis, the relevant articles can clearly improve the prediction results as well. 
 % along with weighted relevant articles as legal basis to support the prediction. 
-Although trained on judgement documents, our model can also generalize to news reports and produces promising results.
 % We automatically build a large scale dataset using public judgement documents of Chinese criminal cases, the experimental results on this dataset show that our method significantly outperforms the baseline SVM model, and the model using relevant articles also outperforms the one with only facts as input. The experiments on news data further indicate reasonable generalizaton ability of our model.
 \end{abstract}

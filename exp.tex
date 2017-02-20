@@ -15,7 +15,7 @@ We use Stochastic Gradient Descent (SGD) for training, with learning rate 0.1, a
 %The chi-square feature selector keeps the top 2,000 features.
 % , and we use the SVM model implemented in scikit-learn \cite{scikit-learn} in our experiments.
 
-We compare our full model with two variations: without article attention supervision and only using facts for charge prediction. We also implement an SVM model, which proves to be effective in many text classification tasks~\cite{wang2012baselines,aletras2016predicting}. Specifically, the SVM model takes bag-of-words TF-IDF features as input, and uses chi-square to select top 2,000 features.
+We compare our full model with two variations: without article attention supervision and only using facts for charge prediction. We also implement an SVM model, which proves to be effective and scales well in many text classification tasks~\cite{wang2012baselines,aletras2016predicting}. Specifically, the SVM model takes bag-of-words TF-IDF features as input, and uses chi-square to select top 2,000 features.
 
 
 \begin{table}
@@ -55,9 +55,10 @@ We compare our full model with two variations: without article attention supervi
 % \hline
 \end{tabular}
 }
-% \vspace{-.5em}
+\vspace{-.5em}
 \caption{Charge prediction results. $^*$ refers to using gold standard articles during training and testing. Left and right side of the slash refer to micro and macro statistics, respectively.}
 \label{tabble_main_results}
+% \vspace{-.5em}
 \end{table}
 
 
@@ -131,8 +132,7 @@ And the NN version %upper-bound
 (\texttt{NN\_gold\_article}) outperforms 
 % our best article version (\texttt{NN\_supv\_article}) 
 \texttt{NN\_supv\_article}
-by over 8\%.
-% , and no surprisingly, \texttt{NN\_article} by more than 10\%.
+by over 8\%, and no surprisingly, \texttt{NN\_article} by more than 10\%.
 %
 These comparisons confirm again that 
 law articles play an important role for automatic judgement prediction, but 
@@ -288,13 +288,13 @@ thus it is important to see how our model will perform on fact descriptions writ
 %
 %We evaluate our models  on news reports that are composed by general reporters,
 %where 
-We then manually annotate 100 news reports %by general reporters 
-from two news websites\footnote{\url{news.cn/legal} and \url{legal.people.com.cn}},
-containing 262 words on average and 25 distinct charges.
+We manually annotate 100 news reports about criminal cases
+from two news websites\footnote{\url{http://news.cn} and \url{http://people.com.cn}},
+with 262 words on average and 25 distinct charges.
 %
 The results are shown in Table \ref{tabble_news_results}, where we only report micro statistics due to 
-the small size of the dataset.
-% the relatively small size of the dataset compared with the number of distinct charges.
+% the small size of the dataset.
+the relatively small size of the dataset compared with the number of distinct charges.
 % since macro ones are not 
 
 %Also note that the size of the news test set is relatively small with regard to the number of charges, which results in less reliable macro statistics, we therefore only report  here.
