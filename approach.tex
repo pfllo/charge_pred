@@ -144,7 +144,7 @@ When more articles are considered,
 % (e.g. articles in the Anti-Drug Law of the People's Republic of China), 
 we can simply add more binary classifiers accordingly, with the existing classifiers untouched.
 
-\orange{Similar to the preliminary classification phase of \cite{liu2015predicting},}
+Similar to the preliminary classification phase of \cite{liu2015predicting},
 we also use word-based SVM as our binary classifier, which is fast and performs well in text classification~\cite{joachims2002learning,wang2012baselines}. Specifically, we use bag-of-words TF-IDF features, chi-square for feature selection and linear kernel for binary classification. 
 % \red{Although the output scores by different classifiers may be not be compared directly, 
 % we consider them as a kind of confidence  and keep the top $k$ articles with the highest confidence.}% are retained for each judgement document.
@@ -179,8 +179,9 @@ The article aggregator aims to find supportive articles for charge prediction fr
 % \orange{Although the top $k$ extracted articles are more like a set, rather than a sequence, }
 %However, as suggested by \cite{vinyals2016matching}, when encoding a set, 
 % \orange{\cite{vinyals2016matching} suggests it is still beneficial to embed the context of each element in the set using a bi-directional RNN.}
-\orange{Although the order of the top $k$ extracted articles is not fully reliable, \cite{vinyals2016matching} suggests it is still beneficial to embed the context of each element in a set, where the order does not even exist, using a bi-directional RNN.}
-In our task, bi-directional RNN may help to capture the co-occurrence of relevant articles.
+Although the order of the top $k$ extracted articles is not fully reliable, \cite{vinyals2016matching} suggests that it is still beneficial to use a bi-directional RNN to embed the context of each element even in a set, where the order does not exist.
+In our task, bi-directional RNN can help to utilize the co-occurrence tendency of relevant articles.
+% \orange{In our task, bi-directional RNN can help to capture the co-occurrence of relevant articles.}
 
 Specifically, we use the attentive sequence encoder in Sec.~\ref{sec_att_seq_encoder} 
 to produce the aggregated article embedding $\mathbf{d}_a$. 

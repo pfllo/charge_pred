@@ -2,7 +2,7 @@
 \label{sec_related_work}
 The charge prediction task aims at finding appropriate charges based on the facts of a case. Previous works consider the task in a multi-class classification framework, take the textual fact description as input and output a charge label. 
 \cite{LIU2004case,liu2006exploring} use KNN to classify charges of criminal cases in Taiwan. However, except for the inferior scalability of the KNN method, their word-level and phrase-level features are too shallow to capture  sufficient evidence to distinguish similar charges with subtle differences. 
-\cite{lin2012exploiting} propose to make deeper understanding of a case by identifying charge-specific factors that are manually designed for two charges. This method also suffers from the scalability issue due to the human efforts required to design and annotate these factors for each pair of charges. Our method, however, employs Bi-GRU and a \orange{two-stack attention mechanism} to make comprehensive understanding of a case without relying on explicit human annotations. 
+\cite{lin2012exploiting} propose to make deeper understanding of a case by identifying charge-specific factors that are manually designed for two charges. This method also suffers from the scalability issue due to the human efforts required to design and annotate these factors for each pair of charges. Our method, however, employs Bi-GRU and a two-stack attention mechanism to make comprehensive understanding of a case without relying on explicit human annotations. 
 %, and all the training data are automatically constructed based on public judgement documents. 
 
 Within the civil law system,
@@ -27,7 +27,7 @@ which party will the outcome side with~\cite{aletras2016predicting}, or whether 
 
 
 We also share similar spirit with the legal question answering task~\cite{COLIEE14}, which aims at answering the yes/no questions in the Japanese legal bar exams, that we all believe that relevant law articles are important for decisions in the civil law system. 
-\orange{Different from ours}, this task requires participants to extract relevant Japanese Civil Code articles first, 
+Different from ours, this task requires participants to extract relevant Japanese Civil Code articles first, 
 and then use them to answer the yes/no questions. 
 The former phase is often treated as an information retrieval task, and the latter phase is considered as a textual entailment task~\cite{kim2014legal,carvalho2016lexical}. 
 % \cite{kim2014legal,kimconvolutional}.
@@ -39,7 +39,7 @@ Recently, various neural network (NN) architectures such as Convolutional Neural
 \cite{tang2015document} proposes a two-layer scheme, RNN or CNN for sentence embedding, and another RNN for document embedding.
 %Our method also uses this two-layer scheme, and shares similar spirit with
 \cite{yang2016hierarchical} further uses global context vectors to attentively distinguish informative words or sentences from non-informative ones during embedding, which we share similar spirit with. 
-But, we take a more flexible and descriptive \orange{two-stack} attention mechanism, \orange{one stack} for fact embedding, and the other one for article embedding which is  dynamically generated for each instance according to the fact-side clues as extra guidance.
+But, we take a more flexible and descriptive two-stack attention mechanism, one stack for fact embedding, and the other one for article embedding which is  dynamically generated for each instance according to the fact-side clues as extra guidance.
 % We also differs from these works in using extracted relevant law articles to support charge classification, which require us to distinguish relevant articles from irrelevant ones, and further aggregate the information from two sources for classification.
 %
 Another difference is the multi-label nature of our task, where, rather than optimizing as multiple binary classification tasks~\cite{nam2014large}, 

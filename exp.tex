@@ -15,7 +15,7 @@ We use Stochastic Gradient Descent (SGD) for training, with learning rate 0.1, a
 %The chi-square feature selector keeps the top 2,000 features.
 % , and we use the SVM model implemented in scikit-learn \cite{scikit-learn} in our experiments.
 
-We compare our full model with two variations: without article attention supervision and only using facts for charge prediction. We also implement an SVM model, which proves to be effective in \orange{many text classification tasks}~\cite{wang2012baselines,aletras2016predicting}. Specifically, the SVM model takes bag-of-words TF-IDF features as input, and uses chi-square to select top 2,000 features.
+We compare our full model with two variations: without article attention supervision and only using facts for charge prediction. We also implement an SVM model, which proves to be effective in many text classification tasks~\cite{wang2012baselines,aletras2016predicting}. Specifically, the SVM model takes bag-of-words TF-IDF features as input, and uses chi-square to select top 2,000 features.
 
 
 \begin{table}
@@ -56,7 +56,7 @@ We compare our full model with two variations: without article attention supervi
 \end{tabular}
 }
 % \vspace{-.5em}
-\caption{Charge prediction results. $^*$ refers to using gold standard articles during training and testing. Left and right side of the slash refer to micro- and macro-statistics, respectively.}
+\caption{Charge prediction results. $^*$ refers to using gold standard articles during training and testing. Left and right side of the slash refer to micro and macro statistics, respectively.}
 \label{tabble_main_results}
 \end{table}
 
@@ -69,9 +69,9 @@ We compare our full model with two variations: without article attention supervi
 %The charge prediction results are summarized in Table \ref{tabble_main_results}. 
 % The left side of the slash refers to micro statistics, and the right side refers to macro statistics. 
 % Micro precision (or recall) is the the number of correct predictions divided by the total number of predictions (or the total number of gold standard charges), while the macro precision (or recall) is the sum of the precision (or recall) of each charge divided by the number of distinct charges. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
-We evaluate the charge prediction task using precision, recall and F1, in both macro- and micro-level.
+We evaluate the charge prediction task using precision, recall and F1, in both micro- and macro-level.
 The macro-precision/recall are calculated by averaging over %the precision/recall of 
-each charge, and the micro- ones are averaged  over each prediction. %In other words, macro statistics give equal weight to each charge, while micro statistics give equal weight to each individual prediction. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
+each charge, and the micro ones are averaged  over each prediction. %In other words, macro statistics give equal weight to each charge, while micro statistics give equal weight to each individual prediction. The micro (or macro) F1 is the harmonic mean of the micro (or macro) precision and recall.
 
 
 %The $Acc.$ refers to instance accuracy, which is the number of instances whose classes are all correctly predicted divided by the total number of instances.
@@ -112,16 +112,17 @@ even with the proved-helpful attentive aggregator, the model performs worst amon
 variants (though still better than \texttt{SVM}). This indicates that  it is necessary to consider both facts and 
 relevant law articles for charge prediction, and,
 the fact that \texttt{NN} outperforms \texttt{NN\_article\_only} also indicates that although the judgments are made based on the statutory laws in the civil law system,
-the \orange{logic of legal reasoning} %\textbf{logical thinking or legal reasoning} 
+the logic %\textbf{logical thinking or legal reasoning} 
 employed by the court when making decisions,
 % of the court behind the formal decisions, 
 to some extent, may be implicitly captured through massive fact-charges paris.
 
 
 
-\orange{Now the question is: \textit{how much improvement can we have by 
-making full use of %expoiting 
-the relevant law articles within the civil law system?}}
+Now the question is: \textit{how much improvement can we have 
+% by making full use of %expoiting 
+if we can make full use of
+the relevant law articles within the civil law system?}
 % \orange{Now the question is: \textit{what is the upper bound of the improvements that can be made by using relevant law articles within the civil law system?}}
 Let us consider an ideal situation where we can access both fact descriptions and gold standard law articles during testing, which could be considered as an upper bound scenario.
 The SVM version (\texttt{SVM\_gold\_article}) significantly outperforms %\texttt{SVM} by around 27\% in macro-F1, and especial
@@ -274,7 +275,7 @@ However, the charge prediction performance does not always increase with the art
 \hline
 \end{tabular}
 }
-\caption{Performance (micro- statistics) on News Data}
+\caption{Performance (micro statistics) on News Data}
 \label{tabble_news_results}
 \end{table}
 

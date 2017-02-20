@@ -2,10 +2,10 @@
 The task of automatic charge prediction is to determine appropriate charges, 
 such as \emph{fraud}, \emph{larceny} or \emph{homicide},  for a given case by analyzing its 
 textual fact description.  Such techniques are crucial for legal assistant systems, where
-users could find similar cases or possible penalties by describing a case with their own words,
-% \orange{This kind of systems are helpful for people who have no legal background and know nothing about the legal jargon, since extra support from the legal professionals are usually expensive.}
-even they have no legal background and 
-know nothing about the legal jargon, \orange{since extra support from the legal professionals are usually expensive.}
+users could find similar cases or possible penalties by describing a case with their own words.
+This are helpful for people who have no legal background and know nothing about the legal jargon, since extra support from the legal professionals are usually expensive.
+% even they have no legal background and know nothing about the legal jargon, \orange{since extra support from the legal professionals are usually expensive.}
+
 
 %Determining appropriate charges, such as \emph{fraud}, \emph{larceny} or \emph{homicide}, 
 %based on the fact description of a case is one of the key components in legal assistance systems.
@@ -20,17 +20,22 @@ However, predicting appropriate charges based on fact descriptions is not trivia
 (1) The differences between two charges can be subtle, for example, in the context of criminal cases in China, 
 distinguishing \emph{intentional homicide} from \emph{intentional injury} would require to determine, 
 from the fact description, whether the defendant  \textit{intended to kill} the victim, 
-or just \textit{intended to hurt the victim, who, unfortunately, died of his severe injury}.
+or just \textit{intended to hurt the victim, who, unfortunately died of severe injury}.
 %but in the cases where the victim is dead.
 % distinguishing \emph{intentional homicide} from \emph{negligent homicide} would require detailed analysis of the behavior of the defendant.
 % and \emph{acceptance of bribes} differs from \emph{acceptance of bribes by a non-state functionary} in the occupation of the defendant. 
-(2) Multiple crimes may be involved in a single case, which means that we need to conduct charge prediction in the multi-label classification paradigm. 
+(2) Multiple crimes may be involved in a single case, which means 
+% that 
+we need to conduct charge prediction in the multi-label classification paradigm. 
 (3) Although we can expect an off-the-shelf classification model to learn to label a case with corresponding charges % certain judgement tags %  implicitly learn the legal basis of the judgement 
 through massive training data,  it is always more convincing to make the prediction with its involved law articles explicitly shown to the users, as certain legal basis to support the prediction. % judgement.  
 %the predicted charges are still not convincing enough if no law articles are involved in the prediction. 
-This issue is of great importance in countries using \textit{the civil law system}, e.g., China (except Hong Kong) and Germany, where the judgement is made based on statutory laws only. 
-For example, in Figure \ref{fig_example_case}, a judgement document in China always includes relevant law articles (usually in the court view part) to support the final decision.  
-Even in countries using \textit{the common law system}, e.g., the United States (except Louisiana) and the United Kingdom, where the judgement is based mainly on decisions of previous cases, there are still several statutory laws that need to be followed when making decisions. 
+This issue is of great importance in countries using \textit{the civil law system}, e.g., China (except Hong Kong), % and Germany, 
+where judgements are made based on statutory laws only. 
+For example, in Fig. \ref{fig_example_case}, a judgement document in China always includes relevant law articles (in the court view part) to support the decision.  
+Even in countries using \textit{the common law system}, e.g., the United States (except Louisiana), % and the United Kingdom, 
+where the judgement is based mainly on decisions of previous cases, there are still %several 
+statutory laws that need to be followed when making decisions. 
 
 % Therefore, to solve this problem, we need a multi-label classification model, that can effectively capture the overall \orange{framework} along with important details of the fact description, and is able to extract and utilize relevant law articles to build the bridge from the fact description to appropriate charges as well. 
 
@@ -74,13 +79,13 @@ ignoring the fact that they could benefit from each other.
 Recent advances in neural networks enable us to jointly model charge prediction and relevant 
 article extraction in a unified framework, %which enables them to influence each other \orange{in a positive way}.
 where the latent correspondence from the fact descriptions about a case to its related law articles 
-and further to its charges can be explicitly addressed by a \orange{two-stack attention} mechanism.
+and further to its charges can be explicitly addressed by a two-stack attention mechanism.
 Specifically,   %to understand the \orange{whole framework} of the facts, inspired by previous works on document classification \cite{tang2015document,yang2016hierarchical}, 
-we use a sentence-level and a document-level Bi-directional Gated Recurrent Units (Bi-GRU)~\cite{bahdanau2015neural} \orange{with a stack of fact-side attention components} to model the correlations among words and sentences, in order to capture the whole story as well as important details of the case. 
+we use a sentence-level and a document-level Bi-directional Gated Recurrent Units (Bi-GRU)~\cite{bahdanau2015neural} with a stack of fact-side attention components to model the correlations among words and sentences, in order to capture the whole story as well as important details of the case. 
 %To capture the important details, we use attention mechanism to select the most informative words or sentences for sentence and document embedding respectively. 
 %To handle the multi-label nature of the problem, we convert the multi-label target to label distribution, and then use cross entropy as loss function. 
 % We find this method works well in our experiments and significantly outperforms the baseline BOW method.
-Given the analysis of the fact descriptions, we accordingly learn \orange{a stack of article-side attention components} to attentively select the most supportive law articles from the statutory laws  to support our charge prediction, which is investigated in a multi-label paradigm.
+Given the analysis of the fact descriptions, we accordingly learn a stack of article-side attention components to attentively select the most supportive law articles from the statutory laws  to support our charge prediction, which is investigated in a multi-label paradigm.
 %we first use a simple BOW-based article classifier to quickly \orange{filter out most of the irrelevant articles}. 
 %Then we attentively aggregate the retained top $k$ articles for further charge classification.
 % Although the top $k$ articles are noisy, the experimental results show that our attentive aggregation module can further attend to relevant ones and thus improve the prediction performance. 
