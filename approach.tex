@@ -3,10 +3,13 @@
 
 \section{Our Approach}
 % In order to generate reasonable charge prediction, 
-As depicted in Fig.~\ref{fig_model_framework}, our approach contains the following steps.
+As depicted in Fig.~\ref{fig_model_framework}, our approach contains the following steps:
 (1) The input fact description is fed to a document encoder to generate the fact embedding $\mathbf{d}_f$, where $\mathbf{u}_{fw}$ and $\mathbf{u}_{fs}$ are global word-level and sentence-level context vectors used to attentively select informative words and sentences.
 (2) Concurrently, the fact description is also passed to an article extractor to find top $k$ relevant law articles. 
-(3) These articles are embedded by another document encoder, and  passed to an article aggregator to attentively select supportive articles, and produce the aggregated article embedding $\mathbf{d}_a$. Specifically, three context vectors, i.e., $\mathbf{u}_{aw}$, $\mathbf{u}_{as}$ and $\mathbf{u}_{ad}$ are dynamically generated from $\mathbf{d}_f$, to enhance the article document encoder and the article aggregator. 
+(3) These articles are embedded by another document encoder, and  passed to an article aggregator to attentively select supportive articles, and produce the aggregated article embedding $\mathbf{d}_a$. Specifically, three context vectors, i.e., $\mathbf{u}_{aw}$, $\mathbf{u}_{as}$ and $\mathbf{u}_{ad}$, are dynamically generated from $\mathbf{d}_f$, to 
+% enhance 
+produce attention values within
+the article document encoder and the article aggregator. 
 (4) Finally, $\mathbf{d}_f$ and $\mathbf{d}_a$ are concatenated and passed to a softmax classifier to predict the charge distribution for the input case.
 
 
@@ -100,7 +103,7 @@ Inspired by \cite{yang2016hierarchical}, we use a context vector to attentively 
 %The framework of our attentive sequence encoder is 
 As shown in Fig.~\ref{fig_seq_encoder}, given the Bi-GRU state sequence $[\mathbf{h}_1, \mathbf{h}_2, ..., \mathbf{h}_T]$, 
 our attentive sequence encoder calculate a sequence of attention values $[\alpha_1, \alpha_2, ..., \alpha_T]$, 
-where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final embedding of the sequence $\mathbf{g}$ is then calculated by:
+where $\alpha_t \in [0, 1]$ and $\sum_t{\alpha_t}=1$. The final sequence embedding $\mathbf{g}$ is then calculated by:
 % \begin{equation}
 % \mathbf{g} = \sum_{t=1}^{T}{\alpha_t \mathbf{h}_t}
 % \label{seq_embed}
@@ -203,12 +206,12 @@ As for training, we use cross entropy as our loss function:
 \label{original_loss}
 Loss= -\sum_{i=1}^N\sum_{l=1}^L{y_{il} log(o_{il})}
 \end{equation} 
-where $N$ is the number of training data, $L$ the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ for case $i$. The target charge distribution $\mathbf{y}_i$ is produced by setting positive labels to $\frac{1}{m_i}$ and negative labels to $0$, where $m_i$ is the number of positive labels for case $i$.
+where $N$ is the number of training data, $L$ the number of charges, $y_{il}$ and $o_{il}$ are the target and predicted probability of charge $l$ for case $i$. The target charge distribution $\mathbf{y}_i$ is produced by setting positive labels to $\frac{1}{m_i}$ and negative labels to $0$, where $m_i$ is the number of positive labels in case $i$.
 
 \paragraph{Supervised Article Attention}
 %Since the judgement documents also contain gold standard relevant law articles, 
 We can also utilize the gold-standard law articles naturally in the judgement documents
-to supervise the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold-standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold-standard articles in the top $k$ extractions.
+to supervise the article attention during training. Specifically, given the top $k$ articles, we want the article attention distribution $\bm{\alpha}\in\mathbb{R}^k$ to simulate the target article distribution $\mathbf{t}\in\mathbb{R}^k$, where $t_j=\frac{1}{k'}$ if article $j$ belongs to the gold-standard articles and $t_j=0$ otherwise. Here $k'$ is the number of gold-standard articles in the top $k$ extractions.
 %
 % : \todo{can be simplified}
 % \begin{equation}

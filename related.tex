@@ -1,6 +1,6 @@
 \section{Related Work}
 \label{sec_related_work}
-The charge prediction task aims at finding appropriate charges based on the facts of a case. Previous works consider the task in a multi-class classification framework, take the textual fact description as input and output a charge label. 
+The charge prediction task aims at finding appropriate charges based on the facts of a case. Previous works consider this task in a multi-class classification framework, which takes the fact description as input and outputs a charge label. 
 \cite{LIU2004case,liu2006exploring} use KNN to classify charges of criminal cases in Taiwan. However, except for the inferior scalability of the KNN method, their word-level and phrase-level features are too shallow to capture  sufficient evidence to distinguish similar charges with subtle differences. 
 \cite{lin2012exploiting} propose to make deeper understanding of a case by identifying charge-specific factors that are manually designed for two charges. This method also suffers from the scalability issue due to the human efforts required to design and annotate these factors for each pair of charges. Our method, however, employs Bi-GRU and a two-stack attention mechanism to make comprehensive understanding of a case without relying on explicit human annotations. 
 %, and all the training data are automatically constructed based on public judgement documents. 
@@ -12,7 +12,7 @@ there are also works focusing on identifying applicable law articles for a given
 law articles are considered.
 \cite{liu2015predicting} instead design a scalable two-step approach %way to find relevant law articles, 
 by first using Support Vector Machine (SVM) for preliminary article classification, and then 
-re-rank the results using the similarity between the words in facts and articles, and the co-occurence tendency among law articles as indicators.
+re-ranking the results using the similarity between the words in facts and articles, and the co-occurence tendency among law articles as indicators.
 % use some reranking methods to get the final relevant article list. 
 We also utilize SVM to extract top $k$ candidate articles, but further adopt Bi-GRU and article-side attention module to better understand the texts and exploring the correlation among articles. 
 % However, to better understand the association between facts and articles, we use attention mechanism to distinguish relevant ones in the top $k$ extraction results. \orange{To make our model fully differenciable,} rather than using frequent pattern mining techinque, we use RNN to model the correlations among articles.
@@ -36,9 +36,9 @@ The former phase is often treated as an information retrieval task, and the latt
 Our work is also related to the task of document classification, but mainly differs in that we also need to automatically identify applicable law articles to improve and support the charge prediction.
 % , a simple but effective method is to combine bag-of-words (BOW) features with varies classifiers~\cite{joachims1998text}. 
 Recently, various neural network (NN) architectures such as Convolutional Neural Network (CNN)~\cite{kim2014convolutional} and Recurrent Neural Network (RNN) have been used for document embedding, which is further used for classification.
-\cite{tang2015document} proposes a two-layer scheme, RNN or CNN for sentence embedding, and another RNN for document embedding.
+\cite{tang2015document} propose a two-layer scheme, RNN or CNN for sentence embedding, and another RNN for document embedding.
 %Our method also uses this two-layer scheme, and shares similar spirit with
-\cite{yang2016hierarchical} further uses global context vectors to attentively distinguish informative words or sentences from non-informative ones during embedding, which we share similar spirit with. 
+\cite{yang2016hierarchical} further use global context vectors to attentively distinguish informative words or sentences from non-informative ones during embedding, which we share similar spirit with. 
 But, we take a more flexible and descriptive two-stack attention mechanism, one stack for fact embedding, and the other one for article embedding which is  dynamically generated for each instance according to the fact-side clues as extra guidance.
 % We also differs from these works in using extracted relevant law articles to support charge classification, which require us to distinguish relevant articles from irrelevant ones, and further aggregate the information from two sources for classification.
 %

@@ -180,12 +180,13 @@ valuable evidence to support the charge prediction.
 
 \paragraph{Case Study}
 We study the model outputs and find certain star-like confusion patterns among the charges. For example, \emph{intentional injury} %(\emph{pivot charges}) 
-is often confused with %multiple charges (\emph{peripheral charges}) like 
+%multiple charges (\emph{peripheral charges}) like 
+is often confused with multiple charges like 
 \emph{intentional homicide} (when the victim is dead, the difference is %it differs from \emph{intentional injury} in
  whether the defendant intends to kill  or just hurt the victim) and \emph{picking quarrels and provoking troubles}
 (there may also exist injuries here).
 % We refer to charges can be confused with multiple charges as \emph{pivot charges}, and the charge often confused with a single charge as \emph{peripheral charges} here.
-These charges usually share similar fact descriptions, e.g., how the injuries are caused, and since \emph{intentional injury} appears more frequently than the others, \texttt{SVM} thus outputs \emph{intentional injury} in most situations, and fails to distinguish these charges.
+These charges usually share some similar fact descriptions, e.g., how the injuries are caused, and since \emph{intentional injury} appears more frequently than the others, \texttt{SVM} thus outputs \emph{intentional injury} in most situations, and fails to distinguish these charges.
 However, by using Bi-GRU and the attention mechanism, \texttt{NN} can attend to important details of the facts and significantly improves the performance on these charges.
 %On the other hand, these learned patterns are not reliable enough, and lead to limited improvements on pivot charges.
 When the direct supervision for articles is available,  \texttt{NN\_supv\_article}  can enhance the interaction between certain pairs of descriptions and law articles, which helps to capture the subtle differences among similar charges, and further improves the performance.
@@ -291,7 +292,9 @@ We then manually annotate 100 news reports %by general reporters
 from two news websites\footnote{\url{news.cn/legal} and \url{legal.people.com.cn}},
 containing 262 words on average and 25 distinct charges.
 %
-The results are shown in Table \ref{tabble_news_results}, where we only report micro statistics due to the small size of the dataset.
+The results are shown in Table \ref{tabble_news_results}, where we only report micro statistics due to 
+the small size of the dataset.
+% the relatively small size of the dataset compared with the number of distinct charges.
 % since macro ones are not 
 
 %Also note that the size of the news test set is relatively small with regard to the number of charges, which results in less reliable macro statistics, we therefore only report  here.
